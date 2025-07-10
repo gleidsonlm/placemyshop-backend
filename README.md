@@ -19,6 +19,18 @@ To get the project running locally, follow these steps:
     $ npm install
     ```
 
+2.  **Set Up Environment Variables:**
+    This project requires a MongoDB database. Connection details are managed through environment variables.
+    - Create a `.env` file in the root of the project. You can copy the `.env.example` file as a template:
+      ```bash
+      $ cp .env.example .env
+      ```
+    - Modify the `.env` file with your MongoDB connection string:
+      ```
+      MONGODB_URI=your_mongodb_connection_string
+      ```
+      For example: `MONGODB_URI=mongodb://localhost:27017/placemyshop`
+
 ## Compile and Run the Project
 
 You can compile and run the project in different modes:
