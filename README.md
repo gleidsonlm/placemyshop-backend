@@ -24,6 +24,8 @@ This is the recommended method as it sets up both the NestJS application and the
 **Prerequisites:**
 - Docker and Docker Compose installed on your system.
 
+A `Dockerfile` is included in the project root to define the build steps for the NestJS application image. The `docker-compose.yml` configuration uses this `Dockerfile` to build the application service. It's designed with multi-stage builds to provide an optimized image for production while supporting development needs.
+
 **Steps:**
 1.  **Clone the repository (if you haven't already).**
 2.  **Navigate to the project root directory.**
