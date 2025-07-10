@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist
+build
+
+# Environment files - should be injected, not part of the image
+.env
+.env.*
+!.env.example
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Editor/IDE specific
+.vscode
+.idea
+
+# Test and coverage output
+coverage
+test-results
+.nyc_output
+
+# Log files
+*.log
+logs
+
+# Local MongoDB data (if someone places it in root by mistake)
+mongo-data/
