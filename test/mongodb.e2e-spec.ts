@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { Connection } from 'mongoose';
-import { getModelToken, InjectConnection } from '@nestjs/mongoose'; // Corrected import for InjectConnection
+import { getConnectionToken } from '@nestjs/mongoose';
 import { INestApplication } from '@nestjs/common';
 
 describe('MongoDB Connection (e2e)', () => {
@@ -17,7 +17,7 @@ describe('MongoDB Connection (e2e)', () => {
     await app.init();
 
     // Inject Mongoose connection
-    connection = moduleFixture.get<Connection>(InjectConnection());
+    connection = moduleFixture.get<Connection>(getConnectionToken());
   });
 
   afterAll(async () => {
