@@ -27,23 +27,39 @@ This is the recommended method as it sets up both the NestJS application and the
 **Steps:**
 1.  **Clone the repository (if you haven't already).**
 2.  **Navigate to the project root directory.**
-3.  **Start the services:**
+3.  **Create and start the services (first time or after changes):**
     ```bash
-    docker-compose up --build
+    docker compose up --build
     ```
-    The `--build` flag ensures the application image is built (or rebuilt if changes are detected).
-    This will start the NestJS application (accessible at `http://localhost:3000` by default) and a MongoDB instance. The application will be configured to connect to this MongoDB instance automatically. MongoDB data will be persisted in a `./mongo-data` directory in your project root.
+    (Note: If you have an older Docker Compose version, you might need `docker-compose up --build` with a hyphen.)
+
+    The `--build` flag ensures the application Docker image is built (or rebuilt if your `Dockerfile` or application code changes). This command will:
+    - Create and start the NestJS application container.
+    - Create and start the MongoDB container.
+    - The application will be accessible at `http://localhost:3000` by default.
+    - MongoDB data will be persisted in a `./mongo-data` directory in your project root.
 
     To run in detached mode (in the background):
     ```bash
-    docker-compose up -d --build
+    docker compose up -d --build
     ```
 
-4.  **To stop the services:**
+4.  **Starting existing stopped containers:**
+    If the containers have been created previously and are just stopped, you can restart them with:
     ```bash
-    docker-compose down
+    docker compose start
     ```
-    If you used `-d`, you can also use `docker-compose stop` to just stop them without removing containers.
+
+5.  **Stopping the services:**
+    To stop the services running in the foreground, press `Ctrl+C`.
+    If running in detached mode (or to stop and remove containers):
+    ```bash
+    docker compose down
+    ```
+    To just stop services without removing containers (if they were started with `up -d`):
+    ```bash
+    docker compose stop
+    ```
 
 **Environment Variables with Docker Compose:**
 - The `MONGODB_URI` for the application service is set directly in the `docker-compose.yml` file to `mongodb://mongodb:27017/placemyshop`. This allows the application container to connect to the MongoDB container using Docker's internal networking.
