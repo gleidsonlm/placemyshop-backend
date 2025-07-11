@@ -1,74 +1,73 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
-import { getModelToken } from '@nestjs/mongoose';
+import { getModelToken, MongooseModule } from '@nestjs/mongoose';
 import { Role } from './roles/schemas/role.schema';
 import { RoleSeedingService } from './roles/role-seeding.service';
-import { Person } from './users/schemas/person.schema'; // Added
-import { Business } from './businesses/schemas/business.schema'; // Added
+import { Person } from './users/schemas/person.schema';
+import { Business } from './businesses/schemas/business.schema';
 
-// No more global jest.mock('@nestjs/mongoose')
+// Mock MongooseModule to avoid database connection
+jest.mock('@nestjs/mongoose', () => ({
+  ...jest.requireActual('@nestjs/mongoose'),
+  MongooseModule: {
+    forRootAsync: jest.fn(() => ({
+      module: jest.fn(),
+      providers: [],
+      exports: [],
+    })),
+    forFeature: jest.fn(() => ({
+      module: jest.fn(),
+      providers: [],
+      exports: [],
+    })),
+  },
+}));
 
 describe('AppModule', () => {
   let testingModule: TestingModule;
   let app: any; // For potential e2e-like checks if needed, or just for compilation
 
   beforeEach(async () => {
-    jest.setTimeout(30000); // Increase timeout for this describe block
-    testingModule = await Test.createTestingModule({
-      imports: [AppModule], // AppModule imports RolesModule, UsersModule, etc.
-    })
-    .overrideProvider(ConfigService)
-    .useValue({
+    const mockConfigService = {
       get: jest.fn((key: string) => {
         if (key === 'MONGODB_URI') {
-          return 'mongodb://localhost/test_db_app_module_spec'; // Mock URI
+          return 'mongodb://mock-uri/test_db';
         }
-        // Add other env variables if your app module depends on them during init
         return process.env[key];
       }),
+    };
+
+    testingModule = await Test.createTestingModule({
+      imports: [AppModule],
     })
+    .overrideProvider(ConfigService)
+    .useValue(mockConfigService)
     .useMocker((token) => {
       const roleModelToken = getModelToken(Role.name);
       const personModelToken = getModelToken(Person.name);
       const businessModelToken = getModelToken(Business.name);
 
       if (token === roleModelToken || token === personModelToken || token === businessModelToken) {
-        // Generic Mongoose Model Mock (Constructor with static methods like findOne, and instance save)
-        const mockSaveInstanceFn = jest.fn().mockResolvedValue({});
-        const mockInstance = (dto: any) => ({ ...dto, save: mockSaveInstanceFn });
-        const MockCtor = jest.fn().mockImplementation(mockInstance);
-
-        (MockCtor as any).findOne = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
-        (MockCtor as any).findById = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
-        (MockCtor as any).find = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
-        (MockCtor as any).create = jest.fn().mockImplementation(dto => Promise.resolve(dto));
-        // Add other common static model methods if needed by any service during init
-
-        return MockCtor;
+        // Create a mock Mongoose model
+        const mockModel: any = jest.fn().mockImplementation((dto: any) => ({
+          ...dto,
+          save: jest.fn().mockResolvedValue(dto),
+        }));
+        
+        // Add static methods that Mongoose models have
+        mockModel.findOne = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+        mockModel.findById = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+        mockModel.find = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
+        mockModel.create = jest.fn().mockResolvedValue({});
+        
+        return mockModel;
       }
 
-      // Generic fallback for other unmocked dependencies
-      // This is a very basic generic mock. Consider using a library like jest-mock-extended if needed.
-      if (typeof token === 'function' && token.prototype) {
-        const mockPrototype: { [key: string]: any } = {};
-        Object.getOwnPropertyNames(token.prototype).forEach(key => {
-          if (typeof token.prototype[key] === 'function') {
-            mockPrototype[key] = jest.fn();
-          }
-        });
-        const ctorMock = jest.fn().mockImplementation(() => mockPrototype);
-        return ctorMock; // Return a mock constructor
-      }
-      return jest.fn(); // Fallback for non-constructor tokens
+      // For any other dependencies, return a basic mock
+      return {};
     })
     .compile();
-
-    // Create an application instance if you need to test lifecycle hooks like OnModuleInit properly
-    // or simulate requests for e2e-like checks within this test.
-    // For just checking module compilation and basic DI, compile() might be enough.
-    // app = testingModule.createNestApplication();
-    // await app.init(); // This would trigger OnModuleInit for RolesModule
   });
 
   // afterEach(async () => {
