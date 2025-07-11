@@ -1,6 +1,6 @@
 # Schema Documentation
 
-This document outlines the data schema design for the `placemyshop-backend` project. We use JSON-LD (JSON for Linking Data) to define our entities, promoting interoperability and semantic clarity.
+This document outlines the data schema design for the `placemyshop-backend` project. We use JSON-LD (JSON for Linking Data) to define our entities, promoting interoperability and semantic clarity by aligning with schema.org vocabularies where applicable.
 
 ## Rationale for JSON-LD
 
@@ -13,124 +13,161 @@ JSON-LD is chosen for its ability to:
 
 ## Core Entities
 
-Below are the initial definitions for our core data entities. These will be expanded as the project evolves.
+The primary entities implemented are Person (User), Role, and Business.
 
-### Professional
+### 1. Person (User) Schema
 
-Represents a liberal professional or a representative of an SMB office using the platform.
+Represents a user of the platform, aligning with `schema.org/Person`.
 
-**JSON-LD Example:**
-
+**JSON-LD Example (Illustrative Output):**
 ```json
 {
-  "@context": "http://schema.org/",
+  "@context": "https://schema.org",
   "@type": "Person",
-  "name": "Dr. Jane Doe",
-  "jobTitle": "General Practitioner",
-  "alumniOf": "University of Medical Sciences",
-  "knowsLanguage": ["en", "es"],
-  "memberOf": {
-    "@type": "Organization",
-    "name": "National Medical Association"
+  "@id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+  "givenName": "John",
+  "familyName": "Doe",
+  "email": "john.doe@example.com",
+  "telephone": "+15551234567",
+  "role": {
+    "@type": "Role",
+    "@id": "r1o2l3e4-e5f6-7890-1234-567890abcdef",
+    "roleName": "Manager"
   },
+  "dateCreated": "2024-07-11T10:00:00.000Z",
+  "dateModified": "2024-07-11T10:00:00.000Z",
+  "status": "Active"
+}
+```
+
+**Fields:**
+
+*   **`@context`**: (string) Specifies the vocabulary (Schema.org).
+*   **`@type`**: (string) Defines the entity type as `Person`.
+*   **`@id`**: (string, UUID v4) Unique identifier for the person.
+*   **`givenName`**: (string, required) The person's given name.
+*   **`familyName`**: (string, required) The person's family name.
+*   **`email`**: (string, required, unique) The person's email address.
+*   **`telephone`**: (string, optional) The person's telephone number.
+*   **`passwordHash`**: (string, internal) Hashed password for authentication (not present in JSON-LD output).
+*   **`role`**: (Object or ObjectId string) Reference to the user's `Role`. When populated, it provides role details.
+    *   **`role.@type`**: (string) "Role".
+    *   **`role.@id`**: (string, UUID v4) Identifier of the Role.
+    *   **`role.roleName`**: (string) Name of the role (e.g., "Admin", "Manager").
+*   **`status`**: (string, enum: "Active", "Inactive", default: "Active") Current status of the user.
+*   **`dateCreated`**: (datetime) Timestamp of when the user was created (maps to Mongoose `createdAt`).
+*   **`dateModified`**: (datetime) Timestamp of when the user was last updated (maps to Mongoose `updatedAt`).
+*   **`deletedAt`**: (datetime, internal) Timestamp for soft deletion.
+*   **`isDeleted`**: (boolean, internal) Flag for soft deletion.
+
+### 2. Role Schema
+
+Represents the role a user has within the system, defining their permissions. While `schema.org/Role` exists, this implementation includes custom permissions.
+
+**JSON-LD Example (Illustrative Output):**
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Role",
+  "@id": "r1o2l3e4-e5f6-7890-1234-567890abcdef",
+  "roleName": "Admin",
+  "permissions": [
+    "user_role_management.manage",
+    "business_details.manage",
+    "customers.manage_admin",
+    "customer_chat.access_full_admin",
+    "external_integrations.manage"
+  ],
+  "dateCreated": "2024-07-11T09:00:00.000Z",
+  "dateModified": "2024-07-11T09:00:00.000Z"
+}
+```
+
+**Fields:**
+
+*   **`@context`**: (string) Specifies the vocabulary (Schema.org).
+*   **`@type`**: (string) Defines the entity type as `Role`.
+*   **`@id`**: (string, UUID v4) Unique identifier for the role.
+*   **`roleName`**: (string, enum: "Admin", "Manager", "Assistant", required, unique) The name of the role.
+*   **`permissions`**: (array of strings, required) List of permission keys associated with the role. Examples:
+    *   Admin: `user_role_management.manage`, `business_details.manage`, etc.
+    *   Manager: `customers.manage_manager`, `customer_chat.access_full_manager`.
+    *   Assistant: `customer_chat.access_read_write`.
+*   **`dateCreated`**: (datetime) Timestamp of creation.
+*   **`dateModified`**: (datetime) Timestamp of last update.
+*   **`deletedAt`**: (datetime, internal) Timestamp for soft deletion.
+*   **`isDeleted`**: (boolean, internal) Flag for soft deletion.
+
+### 3. Business Schema
+
+Represents a local business, aligning with `schema.org/LocalBusiness`.
+
+**JSON-LD Example (Illustrative Output):**
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "b1u2s3i4-n5e6-s7s8-9012-34567890abcd",
+  "name": "John Doe's Clinic",
+  "description": "A friendly local clinic.",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "123 Health St",
-    "addressLocality": "Wellville",
+    "streetAddress": "123 Main St",
+    "addressLocality": "Anytown",
     "addressRegion": "CA",
     "postalCode": "90210",
     "addressCountry": "US"
   },
-  "telephone": "+1-555-123-4567",
-  "email": "jane.doe@example.com",
-  "url": "http://www.janedoeclinic.com",
-  "openingHoursSpecification": [
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday"
-      ],
-      "opens": "09:00",
-      "closes": "17:00"
-    }
+  "telephone": "+15559876543",
+  "email": "contact@johndoesclinic.com",
+  "url": "http://www.johndoesclinic.com",
+  "sameAs": [
+    "http://www.facebook.com/johndoesclinic",
+    "http://www.twitter.com/johndoesclinic"
   ],
-  "hasOfferCatalog": {
-    "@type": "OfferCatalog",
-    "name": "Services Offered",
-    "itemListElement": [
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "General Consultation"
-        }
-      },
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Annual Check-up"
-        }
-      }
-    ]
-  }
+  "openingHours": [
+    "Mo-Fr 09:00-17:00",
+    "Sa 10:00-14:00"
+  ],
+  "founder": {
+    "@type": "Person",
+    "@id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+  },
+  "dateCreated": "2024-07-11T11:00:00.000Z",
+  "dateModified": "2024-07-11T11:00:00.000Z"
 }
 ```
 
 **Fields:**
 
-*   **`@context`**: Specifies the vocabulary (Schema.org in this case).
-*   **`@type`**: Defines the entity type (e.g., `Person`, `Physician`).
-*   **`name`**: The professional's full name.
-*   **`jobTitle`**: The professional's specific title (e.g., Dentist, Lawyer, Architect).
-*   **`alumniOf`**: Educational institutions attended.
-*   **`knowsLanguage`**: Languages spoken.
-*   **`memberOf`**: Professional organizations.
-*   **`address`**: Physical office address.
-*   **`telephone`**: Contact phone number.
-*   **`email`**: Contact email address.
-*   **`url`**: Website URL.
-*   **`openingHoursSpecification`**: Office opening hours.
-*   **`hasOfferCatalog`**: List of services offered.
-
-### Client
-
-Represents a client or patient of the professional or SMB office.
-
-**JSON-LD Example:**
-
-```json
-{
-  "@context": "http://schema.org/",
-  "@type": "Person",
-  "name": "John Smith",
-  "email": "john.smith@example.com",
-  "telephone": "+1-555-789-0123",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "456 Client Ave",
-    "addressLocality": "Anytown",
-    "addressRegion": "TX",
-    "postalCode": "73301",
-    "addressCountry": "US"
-  }
-}
-```
-
-**Fields:**
-
-*   **`@context`**: Specifies the vocabulary (Schema.org).
-*   **`@type`**: Defines the entity type as `Person`.
-*   **`name`**: The client's full name.
-*   **`email`**: Client's email address.
-*   **`telephone`**: Client's phone number.
-*   **`address`**: Client's address.
+*   **`@context`**: (string) Specifies the vocabulary (Schema.org).
+*   **`@type`**: (string, default: "LocalBusiness") Defines the entity type.
+*   **`@id`**: (string, UUID v4) Unique identifier for the business.
+*   **`name`**: (string, required) The name of the business.
+*   **`description`**: (string, optional) A description of the business.
+*   **`address`**: (Object, optional) The physical address of the business.
+    *   **`address.@type`**: (string) "PostalAddress".
+    *   **`address.streetAddress`**: (string, optional)
+    *   **`address.addressLocality`**: (string, optional) City.
+    *   **`address.addressRegion`**: (string, optional) State/Region.
+    *   **`address.postalCode`**: (string, optional)
+    *   **`address.addressCountry`**: (string, optional)
+*   **`telephone`**: (string, optional) Contact telephone number.
+*   **`email`**: (string, optional) Contact email address.
+*   **`url`**: (string, optional, URL) The official website of the business.
+*   **`sameAs`**: (array of strings, optional, URL) Links to social media profiles or other relevant pages.
+*   **`openingHours`**: (array of strings, optional) Textual representation of opening hours (e.g., "Mo-Fr 09:00-17:00").
+*   **`founder`**: (Object or ObjectId string, required) Reference to the `Person` who founded/owns the business. When populated:
+    *   **`founder.@type`**: (string) "Person".
+    *   **`founder.@id`**: (string, UUID v4) Identifier of the founder (Person's `@id`).
+*   **`dateCreated`**: (datetime) Timestamp of creation.
+*   **`dateModified`**: (datetime) Timestamp of last update.
+*   **`deletedAt`**: (datetime, internal) Timestamp for soft deletion.
+*   **`isDeleted`**: (boolean, internal) Flag for soft deletion.
 
 ---
 
 This documentation will be updated as new entities are introduced or existing ones are modified.
+The JSON-LD examples are illustrative of the output when references are populated. The actual stored MongoDB documents will contain ObjectId references for `role` and `founder` fields.
+Soft delete fields (`deletedAt`, `isDeleted`) and `passwordHash` are for internal use and generally not exposed directly in public-facing JSON-LD unless specifically required.
 ```
