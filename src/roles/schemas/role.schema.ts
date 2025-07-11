@@ -68,8 +68,17 @@ RoleSchema.virtual('dateModified').get(function(this: RoleDocument) {
 
 RoleSchema.set('toJSON', {
   virtuals: true,
-  transform: function(doc: any, ret: any) { // Use any for doc to match Mongoose's flexible signature
-    // delete ret._id; // Optional: if @id is preferred
+  transform: function(doc: any, ret: any) { // Reverted doc type to any
+    // Ensure the main document's @id is correctly set
+    // Prefer the document's '@id' field if it exists and is a non-empty string,
+    // otherwise fall back to _id.toString().
+    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
+      ret['@id'] = doc['@id'];
+    } else if (doc._id) { // Mongoose Document _id
+      ret['@id'] = doc._id.toString();
+    }
+
+    // delete ret._id; // Optional: if @id is preferred over _id in output
     // delete ret.__v; // Optional: remove version key
     return ret;
   }

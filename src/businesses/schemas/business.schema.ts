@@ -96,45 +96,34 @@ BusinessSchema.virtual('dateModified').get(function(this: BusinessDocument) {
 BusinessSchema.set('toJSON', {
   virtuals: true,
   getters: true,
-  transform: function (doc: any, ret: any) { // Use any for doc to match Mongoose's flexible signature
-    // Customize the 'founder' field output
-    if (ret.founder && ret.founder instanceof Document) { // Check if populated Mongoose Document
-      const founderObject = ret.founder.toObject({ virtuals: true });
-      // console.log("Transforming Business's founder. founderObject:", JSON.stringify(founderObject, null, 2));
-      // console.log("founderObject['@id'] type:", typeof founderObject['@id'], "value:", founderObject['@id']);
-      // console.log("founderObject._id type:", typeof founderObject._id, "value:", founderObject._id);
+  transform: function (doc: any, ret: any) {
+    // Customize the 'founder' field output.
+    // When founder is populated, PersonSchema.toJSON will have already run.
+    // ret.founder will be the plain object result from PersonSchema.toJSON.
+    if (ret.founder && typeof ret.founder === 'object' && !Array.isArray(ret.founder) && ret.founder['@id']) {
+      // ret.founder is the already transformed plain object from PersonSchema.toJSON
+      const founderPlainObject = ret.founder;
 
-      // Removed the duplicated 'let idValue;' and if/else block.
-      // Kept the intended single line declaration:
+      // The PersonSchema.toJSON should have already correctly set '@id' on founderPlainObject.
+      // We are re-shaping it here as per test expectations for businessJSON.founder.
+      // console.log(`[Business toJSON] founderPlainObject from PersonSchema.toJSON:`, JSON.stringify(founderPlainObject));
+      // console.log(`[Business toJSON] Using founderPlainObject['@id']: ${founderPlainObject['@id']}`);
 
-      console.log(`[Business toJSON] founderObject raw:`, JSON.stringify(founderObject));
-      console.log(`[Business toJSON] founderObject['@id'] TYPE: ${typeof founderObject['@id']}, VALUE: ${founderObject['@id']}`);
-      console.log(`[Business toJSON] founderObject._id TYPE: ${typeof founderObject._id}, VALUE: ${founderObject._id}`);
-      console.log(`[Business toJSON] founderObject._id.toString() VALUE: ${founderObject._id?.toString()}`);
-
-      let finalIdValue: string = '';
-      if (typeof founderObject['@id'] === 'string' && founderObject['@id'].length > 0) {
-        finalIdValue = founderObject['@id'];
-      } else if (founderObject._id) {
-        finalIdValue = founderObject._id.toString();
-      }
-      console.log(`[Business toJSON] CHOSEN finalIdValue TYPE: ${typeof finalIdValue}, VALUE: ${finalIdValue}`);
       ret.founder = {
-        '@type': 'Person',
-        '@id': finalIdValue,
-        // Optionally include other relevant founder details like name
-        // givenName: founderObject.givenName,
-        // familyName: founderObject.familyName,
+        '@type': 'Person', // As expected by the test
+        '@id': founderPlainObject['@id'], // This should be the correct string ID
+        // Test doesn't expect other fields like givenName, familyName here,
+        // so we only include @type and @id for the founder object within businessJSON.
       };
-    } else if (ret.founder) { // If it's just an ID (ObjectId)
-      // This block should correctly handle the case where founder is not populated
+    } else if (ret.founder) { // If founder is not populated (it's an ObjectId or its string representation)
+      // console.log(`[Business toJSON] Unpopulated founder, value: ${ret.founder.toString()}`);
       ret.founder = {
         '@type': 'Person',
-        '@id': String(ret.founder.toString()), // Ensure it's a string
+        '@id': ret.founder.toString(), // Convert ObjectId to string
       };
     }
 
-    // Optionally remove Mongoose version key and internal _id
+    // Optionally remove Mongoose version key and internal _id from the Business object itself
     // delete ret.__v;
     // delete ret._id;
     return ret;

@@ -77,56 +77,62 @@ PersonSchema.virtual('dateModified').get(function(this: PersonDocument) {
 // Ensure virtuals are included in toJSON and toObject outputs
 PersonSchema.set('toJSON', {
   virtuals: true,
-  // Using `any` for doc type in transform to bypass overly strict Mongoose signature
-  // while ensuring runtime properties are accessible. `ret` is the modified object.
-  transform: function (doc: any, ret: any) {
-    // Customize the 'role' field output if it's populated
-    // A more robust check for a populated document (vs. just an ObjectId)
-    if (ret.role && ret.role instanceof Document) { // Check if it's a Mongoose Document
-      const roleObject = ret.role.toObject({ virtuals: true }); // Ensure virtuals from populated doc too
-      // console.log("Transforming Person's role. roleObject:", JSON.stringify(roleObject, null, 2));
-      // console.log("roleObject['@id'] type:", typeof roleObject['@id'], "value:", roleObject['@id']);
-      // console.log("roleObject._id type:", typeof roleObject._id, "value:", roleObject._id);
-      // console.log("roleObject._id.toString() value:", roleObject._id?.toString());
+  transform: function (doc: any, ret: any) { // Reverted doc type to any
+    // Ensure the main document's @id is correctly set
+    // Prefer the document's '@id' field if it exists and is a non-empty string,
+    // otherwise fall back to _id.toString().
+    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
+      ret['@id'] = doc['@id'];
+    } else if (doc._id) {
+      ret['@id'] = doc._id.toString();
+    }
 
-      // Removed the duplicated 'let idValue;' and if/else block.
-      // Kept the intended single line declaration:
-
-      console.log(`[Person toJSON] roleObject raw:`, JSON.stringify(roleObject));
-      console.log(`[Person toJSON] roleObject['@id'] TYPE: ${typeof roleObject['@id']}, VALUE: ${roleObject['@id']}`);
-      console.log(`[Person toJSON] roleObject._id TYPE: ${typeof roleObject._id}, VALUE: ${roleObject._id}`);
-      console.log(`[Person toJSON] roleObject._id.toString() VALUE: ${roleObject._id?.toString()}`);
-
-      let finalIdValue: string = ''; // Default to empty string
-      if (typeof roleObject['@id'] === 'string' && roleObject['@id'].length > 0) {
-        finalIdValue = roleObject['@id'];
-      } else if (roleObject._id) {
-        finalIdValue = roleObject._id.toString();
-      }
-      console.log(`[Person toJSON] CHOSEN finalIdValue TYPE: ${typeof finalIdValue}, VALUE: ${finalIdValue}`);
-      console.log(`[Person toJSON] FINAL CHECK before assign: finalIdValue is: ${finalIdValue}, type: ${typeof finalIdValue}`);
-
-      ret.role = {
-        '@type': 'Role',
-        '@id': finalIdValue,
-        roleName: roleObject.roleName,
-      };
-    } else if (ret.role) { // If it's just an ID (ObjectId)
-      ret.role = {
-        '@type': 'Role', // Still good to indicate type
-        '@id': ret.role.toString(), // Convert ObjectId to string
-      };
+    // Customize the 'role' field output
+    if (ret.role && typeof ret.role === 'object') { // Check if role is populated (object)
+        // If role itself has a toObject (it's a Mongoose document)
+        const roleDoc = doc.role as any; // doc.role should be the populated Mongoose document
+        if (roleDoc && typeof roleDoc.toObject === 'function') {
+            const roleObject = roleDoc.toObject({ virtuals: true });
+            let roleIdValue = '';
+            if (typeof roleObject['@id'] === 'string' && roleObject['@id'].length > 0) {
+                roleIdValue = roleObject['@id'];
+            } else if (roleObject._id) {
+                roleIdValue = roleObject._id.toString();
+            }
+            ret.role = {
+                '@type': 'Role',
+                '@id': roleIdValue,
+                // Ensure roleName is included if it exists on the transformed roleObject
+                ...(roleObject.roleName && { roleName: roleObject.roleName }),
+            };
+        } else if (ret.role._id) { // If it's a simple object with an _id (less likely for populated)
+             let roleIdValue = '';
+            if (typeof ret.role['@id'] === 'string' && ret.role['@id'].length > 0) {
+                roleIdValue = ret.role['@id'];
+            } else {
+                roleIdValue = ret.role._id.toString();
+            }
+            ret.role = {
+                '@type': 'Role',
+                '@id': roleIdValue,
+                ...(ret.role.roleName && { roleName: ret.role.roleName }),
+            };
+        }
+        // If ret.role is already transformed and has '@id', leave it, or handle as needed
+    } else if (ret.role) { // If role is just an ObjectId (string or ObjectId)
+        ret.role = {
+            '@type': 'Role',
+            '@id': ret.role.toString(),
+        };
     }
 
     // Remove passwordHash from output
-    // Make sure ret.passwordHash is treated as potentially existing
     if ('passwordHash' in ret) {
       delete ret.passwordHash;
     }
+    // delete ret.__v; // Mongoose version key
+    // delete ret._id; // Keep _id by default, or remove if specified by requirements
 
-    // Optionally remove Mongoose version key and internal _id
-    // delete ret.__v;
-    // delete ret._id;
     return ret;
   },
 });
