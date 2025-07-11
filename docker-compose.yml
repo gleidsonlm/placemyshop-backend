@@ -1,0 +1,33 @@
+services:
+  mongodb:
+    image: mongo:7.0 # Using a specific recent version
+    container_name: placemyshop_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db # Persist MongoDB data locally
+    networks:
+      - placemyshop-net
+
+  app:
+    build: . # Build the Docker image from the Dockerfile in the current directory
+    container_name: placemyshop_app
+    ports:
+      - "3000:3000" # Assuming NestJS app runs on port 3000
+    volumes:
+      - .:/usr/src/app # Mount current directory to app's working directory
+      - /usr/src/app/node_modules # Anonymous volume to prevent local node_modules from overwriting container's
+    command: npm run start:dev
+    depends_on:
+      - mongodb
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/placemyshop
+      - NODE_ENV=development
+      # Add any other environment variables your app needs
+      # e.g., PORT=3000 (if your app uses process.env.PORT)
+    networks:
+      - placemyshop-net
+
+networks:
+  placemyshop-net:
+    driver: bridge
