@@ -137,6 +137,50 @@ To run the test suites:
 
 These tests are integral to our development process. We follow Test-Driven Development (TDD) principles, meaning tests are typically written before or alongside the implementation code. See `AGENTS.md` for detailed TDD guidelines.
 
+## Testing
+
+This project uses Jest for testing with TypeScript support. The test configuration is designed to work with Node.js/npm.
+
+### Running Tests
+
+```bash
+# Run all unit tests (excludes schema tests that require MongoDB)
+npm run test:unit
+
+# Run all tests (requires MongoDB connection for schema tests)
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:cov
+
+# Run e2e tests (requires MongoDB connection)
+npm run test:e2e
+```
+
+### Test Structure
+
+- **Unit Tests:** DTO validation, service logic, controller behavior
+- **Schema Tests:** Mongoose schema validation and transformation (requires MongoDB)
+- **E2E Tests:** Full application integration tests
+
+### Bun Compatibility
+
+While Bun can be used for building and development, the current test suite uses Jest-specific APIs that are not compatible with Bun's test runner. For testing, please use npm:
+
+```bash
+# Use npm for testing
+npm test
+
+# Use Bun for development and building
+bun run start:dev
+bun run build
+```
+
+See `BUN_TESTING.md` for more details on Bun test compatibility.
+
 ## Documentation
 
 Further documentation is in progress and will adhere to the guidelines outlined in [`AGENTS.md`](./AGENTS.md). This includes detailed schema definitions in [`docs/SCHEMA.md`](./docs/SCHEMA.md) and API endpoint documentation.
