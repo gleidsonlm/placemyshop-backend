@@ -16,6 +16,8 @@ export enum PersonStatus {
 export interface PersonDocument extends Person, Document {
   createdAt: Date;
   updatedAt: Date;
+  softDelete(): Promise<this & Document<unknown, {}, PersonDocument>>; // Add method signatures
+  restore(): Promise<this & Document<unknown, {}, PersonDocument>>;
 }
 
 @Schema({ timestamps: true, collection: 'persons' })
@@ -81,10 +83,32 @@ PersonSchema.set('toJSON', {
     // Customize the 'role' field output if it's populated
     // A more robust check for a populated document (vs. just an ObjectId)
     if (ret.role && ret.role instanceof Document) { // Check if it's a Mongoose Document
-      const roleObject = ret.role.toObject(); // Get plain object if it's a Mongoose document
+      const roleObject = ret.role.toObject({ virtuals: true }); // Ensure virtuals from populated doc too
+      // console.log("Transforming Person's role. roleObject:", JSON.stringify(roleObject, null, 2));
+      // console.log("roleObject['@id'] type:", typeof roleObject['@id'], "value:", roleObject['@id']);
+      // console.log("roleObject._id type:", typeof roleObject._id, "value:", roleObject._id);
+      // console.log("roleObject._id.toString() value:", roleObject._id?.toString());
+
+      // Removed the duplicated 'let idValue;' and if/else block.
+      // Kept the intended single line declaration:
+
+      console.log(`[Person toJSON] roleObject raw:`, JSON.stringify(roleObject));
+      console.log(`[Person toJSON] roleObject['@id'] TYPE: ${typeof roleObject['@id']}, VALUE: ${roleObject['@id']}`);
+      console.log(`[Person toJSON] roleObject._id TYPE: ${typeof roleObject._id}, VALUE: ${roleObject._id}`);
+      console.log(`[Person toJSON] roleObject._id.toString() VALUE: ${roleObject._id?.toString()}`);
+
+      let finalIdValue: string = ''; // Default to empty string
+      if (typeof roleObject['@id'] === 'string' && roleObject['@id'].length > 0) {
+        finalIdValue = roleObject['@id'];
+      } else if (roleObject._id) {
+        finalIdValue = roleObject._id.toString();
+      }
+      console.log(`[Person toJSON] CHOSEN finalIdValue TYPE: ${typeof finalIdValue}, VALUE: ${finalIdValue}`);
+      console.log(`[Person toJSON] FINAL CHECK before assign: finalIdValue is: ${finalIdValue}, type: ${typeof finalIdValue}`);
+
       ret.role = {
         '@type': 'Role',
-        '@id': roleObject['@id'] || roleObject._id?.toString(),
+        '@id': finalIdValue,
         roleName: roleObject.roleName,
       };
     } else if (ret.role) { // If it's just an ID (ObjectId)

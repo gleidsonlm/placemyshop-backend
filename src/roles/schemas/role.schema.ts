@@ -30,6 +30,8 @@ export enum RoleName {
 export interface RoleDocument extends Role, Document {
   createdAt: Date;
   updatedAt: Date;
+  softDelete(): Promise<this & Document<unknown, {}, RoleDocument>>;
+  restore(): Promise<this & Document<unknown, {}, RoleDocument>>;
 }
 
 @Schema({ timestamps: true, collection: 'roles' })

@@ -32,6 +32,8 @@ export const PostalAddressSchema = SchemaFactory.createForClass(PostalAddress);
 export interface BusinessDocument extends Business, Document {
   createdAt: Date;
   updatedAt: Date;
+  softDelete(): Promise<this & Document<unknown, {}, BusinessDocument>>;
+  restore(): Promise<this & Document<unknown, {}, BusinessDocument>>;
 }
 
 @Schema({ timestamps: true, collection: 'businesses' })
@@ -97,18 +99,38 @@ BusinessSchema.set('toJSON', {
   transform: function (doc: any, ret: any) { // Use any for doc to match Mongoose's flexible signature
     // Customize the 'founder' field output
     if (ret.founder && ret.founder instanceof Document) { // Check if populated Mongoose Document
-      const founderObject = ret.founder.toObject();
+      const founderObject = ret.founder.toObject({ virtuals: true });
+      // console.log("Transforming Business's founder. founderObject:", JSON.stringify(founderObject, null, 2));
+      // console.log("founderObject['@id'] type:", typeof founderObject['@id'], "value:", founderObject['@id']);
+      // console.log("founderObject._id type:", typeof founderObject._id, "value:", founderObject._id);
+
+      // Removed the duplicated 'let idValue;' and if/else block.
+      // Kept the intended single line declaration:
+
+      console.log(`[Business toJSON] founderObject raw:`, JSON.stringify(founderObject));
+      console.log(`[Business toJSON] founderObject['@id'] TYPE: ${typeof founderObject['@id']}, VALUE: ${founderObject['@id']}`);
+      console.log(`[Business toJSON] founderObject._id TYPE: ${typeof founderObject._id}, VALUE: ${founderObject._id}`);
+      console.log(`[Business toJSON] founderObject._id.toString() VALUE: ${founderObject._id?.toString()}`);
+
+      let finalIdValue: string = '';
+      if (typeof founderObject['@id'] === 'string' && founderObject['@id'].length > 0) {
+        finalIdValue = founderObject['@id'];
+      } else if (founderObject._id) {
+        finalIdValue = founderObject._id.toString();
+      }
+      console.log(`[Business toJSON] CHOSEN finalIdValue TYPE: ${typeof finalIdValue}, VALUE: ${finalIdValue}`);
       ret.founder = {
         '@type': 'Person',
-        '@id': founderObject['@id'] || founderObject._id?.toString(),
+        '@id': finalIdValue,
         // Optionally include other relevant founder details like name
         // givenName: founderObject.givenName,
         // familyName: founderObject.familyName,
       };
     } else if (ret.founder) { // If it's just an ID (ObjectId)
+      // This block should correctly handle the case where founder is not populated
       ret.founder = {
         '@type': 'Person',
-        '@id': ret.founder.toString(),
+        '@id': String(ret.founder.toString()), // Ensure it's a string
       };
     }
 
