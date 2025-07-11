@@ -77,10 +77,11 @@ PersonSchema.virtual('dateModified').get(function(this: PersonDocument) {
 // Ensure virtuals are included in toJSON and toObject outputs
 PersonSchema.set('toJSON', {
   virtuals: true,
-  transform: function (doc: any, ret: any) { // Reverted doc type to any
+  transform: function (doc: any, ret: any) {
+    ret['@context'] = 'https://schema.org';
+    ret['@type'] = 'Person';
+
     // Ensure the main document's @id is correctly set
-    // Prefer the document's '@id' field if it exists and is a non-empty string,
-    // otherwise fall back to _id.toString().
     if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
       ret['@id'] = doc['@id'];
     } else if (doc._id) {
@@ -89,23 +90,27 @@ PersonSchema.set('toJSON', {
 
     // Customize the 'role' field output
     if (ret.role && typeof ret.role === 'object') { // Check if role is populated (object)
-        // If role itself has a toObject (it's a Mongoose document)
-        const roleDoc = doc.role as any; // doc.role should be the populated Mongoose document
+        const roleDoc = doc.role as any;
         if (roleDoc && typeof roleDoc.toObject === 'function') {
-            const roleObject = roleDoc.toObject({ virtuals: true });
+            const roleObject = roleDoc.toObject({ virtuals: true }); // Role's toJSON would have run
             let roleIdValue = '';
-            if (typeof roleObject['@id'] === 'string' && roleObject['@id'].length > 0) {
+            // roleObject from toObject might not have @id directly if it wasn't transformed by Role's toJSON yet
+            // or if it's a plain object from a deeper population.
+            // Prefer roleDoc['@id'] or roleDoc._id from the original populated document.
+            if (typeof roleDoc['@id'] === 'string' && roleDoc['@id'].length > 0) {
+                roleIdValue = roleDoc['@id'];
+            } else if (roleDoc._id) {
+                roleIdValue = roleDoc._id.toString();
+            } else if (typeof roleObject['@id'] === 'string' && roleObject['@id'].length > 0){
                 roleIdValue = roleObject['@id'];
-            } else if (roleObject._id) {
-                roleIdValue = roleObject._id.toString();
             }
+
             ret.role = {
-                '@type': 'Role',
+                '@type': 'Role', // Role's toJSON should handle its own @type and @context
                 '@id': roleIdValue,
-                // Ensure roleName is included if it exists on the transformed roleObject
                 ...(roleObject.roleName && { roleName: roleObject.roleName }),
             };
-        } else if (ret.role._id) { // If it's a simple object with an _id (less likely for populated)
+        } else if (ret.role._id) { // Fallback if role is somehow a plain object with _id
              let roleIdValue = '';
             if (typeof ret.role['@id'] === 'string' && ret.role['@id'].length > 0) {
                 roleIdValue = ret.role['@id'];
@@ -118,11 +123,10 @@ PersonSchema.set('toJSON', {
                 ...(ret.role.roleName && { roleName: ret.role.roleName }),
             };
         }
-        // If ret.role is already transformed and has '@id', leave it, or handle as needed
     } else if (ret.role) { // If role is just an ObjectId (string or ObjectId)
         ret.role = {
             '@type': 'Role',
-            '@id': ret.role.toString(),
+            '@id': ret.role.toString(), // This will be the ObjectId string
         };
     }
 
@@ -130,8 +134,13 @@ PersonSchema.set('toJSON', {
     if ('passwordHash' in ret) {
       delete ret.passwordHash;
     }
-    // delete ret.__v; // Mongoose version key
-    // delete ret._id; // Keep _id by default, or remove if specified by requirements
+    // Clean up Mongoose specific fields if not desired
+    // delete ret.__v;
+    // delete ret._id; // schema.org uses @id, so _id might be redundant in final JSON-LD
+
+    // Ensure dateCreated and dateModified are using the virtuals
+    ret.dateCreated = doc.dateCreated;
+    ret.dateModified = doc.dateModified;
 
     return ret;
   },

@@ -97,33 +97,63 @@ BusinessSchema.set('toJSON', {
   virtuals: true,
   getters: true,
   transform: function (doc: any, ret: any) {
-    // Customize the 'founder' field output.
-    // When founder is populated, PersonSchema.toJSON will have already run.
-    // ret.founder will be the plain object result from PersonSchema.toJSON.
-    if (ret.founder && typeof ret.founder === 'object' && !Array.isArray(ret.founder) && ret.founder['@id']) {
-      // ret.founder is the already transformed plain object from PersonSchema.toJSON
-      const founderPlainObject = ret.founder;
-
-      // The PersonSchema.toJSON should have already correctly set '@id' on founderPlainObject.
-      // We are re-shaping it here as per test expectations for businessJSON.founder.
-      // console.log(`[Business toJSON] founderPlainObject from PersonSchema.toJSON:`, JSON.stringify(founderPlainObject));
-      // console.log(`[Business toJSON] Using founderPlainObject['@id']: ${founderPlainObject['@id']}`);
-
-      ret.founder = {
-        '@type': 'Person', // As expected by the test
-        '@id': founderPlainObject['@id'], // This should be the correct string ID
-        // Test doesn't expect other fields like givenName, familyName here,
-        // so we only include @type and @id for the founder object within businessJSON.
-      };
-    } else if (ret.founder) { // If founder is not populated (it's an ObjectId or its string representation)
-      // console.log(`[Business toJSON] Unpopulated founder, value: ${ret.founder.toString()}`);
-      ret.founder = {
-        '@type': 'Person',
-        '@id': ret.founder.toString(), // Convert ObjectId to string
-      };
+    ret['@context'] = 'https://schema.org';
+    // '@type' is already handled by a direct Prop default: 'LocalBusiness'
+    // but ensure it's present in the final 'ret' object
+    if (!ret['@type']) {
+        ret['@type'] = doc['@type'] || 'LocalBusiness';
     }
 
-    // Optionally remove Mongoose version key and internal _id from the Business object itself
+    // Ensure the main document's @id is correctly set
+    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
+      ret['@id'] = doc['@id'];
+    } else if (doc._id) {
+      ret['@id'] = doc._id.toString();
+    }
+
+    // Customize the 'founder' field output
+    if (ret.founder) {
+      const founderDoc = doc.founder; // Original populated document or ObjectId
+      let founderIdValue = '';
+
+      if (founderDoc && typeof founderDoc === 'object') { // Populated
+        if (typeof founderDoc['@id'] === 'string' && founderDoc['@id'].length > 0) {
+          founderIdValue = founderDoc['@id'];
+        } else if (founderDoc._id) {
+          founderIdValue = founderDoc._id.toString();
+        }
+      } else if (founderDoc) { // ObjectId or string ID
+        founderIdValue = founderDoc.toString();
+      }
+
+      if (founderIdValue) {
+        ret.founder = {
+          '@type': 'Person',
+          '@id': founderIdValue,
+        };
+      } else if (typeof ret.founder === 'object' && ret.founder['@id']) {
+        // If Person's toJSON already transformed it and put an '@id'
+         ret.founder = {
+          '@type': 'Person',
+          '@id': ret.founder['@id'],
+        };
+      } else if (ret.founder) { // Fallback for non-object ID case
+         ret.founder = {
+          '@type': 'Person',
+          '@id': ret.founder.toString(),
+        };
+      }
+    }
+
+    // Ensure PostalAddress gets its @type if it's not automatically included by sub-schema toJSON
+    if (ret.address && typeof ret.address === 'object' && !ret.address['@type']) {
+        ret.address['@type'] = 'PostalAddress';
+    }
+
+    // Ensure dateCreated and dateModified are using the virtuals
+    ret.dateCreated = doc.dateCreated;
+    ret.dateModified = doc.dateModified;
+
     // delete ret.__v;
     // delete ret._id;
     return ret;
