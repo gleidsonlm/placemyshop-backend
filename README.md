@@ -9,6 +9,7 @@ This project is built using:
 - **NestJS:** A progressive Node.js framework for building efficient, reliable and scalable server-side applications.
 - **TypeScript (Strict Mode):** We leverage TypeScript's strong typing system with strict mode enabled to ensure code quality and maintainability.
 - **MVC Pattern:** The project adheres to NestJS's standard Model-View-Controller (MVC) architectural pattern.
+- **Test-Driven Development (TDD):** Development practices emphasize writing tests first to ensure code quality, maintainability, and clear specifications. (See `AGENTS.md` for more details on TDD guidelines).
 
 ## Project Setup
 
@@ -125,6 +126,8 @@ To run the test suites:
     ```bash
     $ npm run test:cov
     ```
+
+These tests are integral to our development process. We follow Test-Driven Development (TDD) principles, meaning tests are typically written before or alongside the implementation code. See `AGENTS.md` for detailed TDD guidelines.
 
 ## Documentation
 

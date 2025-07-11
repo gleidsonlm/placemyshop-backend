@@ -7,16 +7,30 @@ This document outlines the guidelines for using AI coding agents in the `placemy
 AI coding agents are intended to assist with the development of this project by:
 
 - Generating boilerplate code.
-- Implementing new features based on detailed specifications.
-- Writing unit and integration tests.
-- Refactoring existing code for clarity and performance.
+- Implementing new features by first defining behavior with tests (Test-Driven Development).
+- Writing unit, integration, and potentially end-to-end tests that precede or co-evolve with implementation code.
+- Writing implementation code to make these tests pass.
+- Refactoring existing code (and corresponding tests) for clarity and performance.
 - Assisting with documentation.
 
-Agents are expected to accelerate development and improve code quality by adhering to the project's standards and conventions.
+Agents are expected to accelerate development and improve code quality by adhering to the project's standards and conventions, with a strong emphasis on test-first development.
 
 ## Project Standards
 
 All contributions made by AI coding agents **must** adhere to the following standards:
+
+- **Test-Driven Development (TDD):**
+    - **Test-First Approach:** New features, bug fixes, and significant refactors should begin with writing tests that clearly define the expected behavior or replicate the bug.
+    - **Red-Green-Refactor Cycle:** Follow the TDD cycle:
+        1.  **Red:** Write a test that fails because the feature or fix is not yet implemented.
+        2.  **Green:** Write the minimal amount of code necessary to make the test pass.
+        3.  **Refactor:** Improve the code (and tests if necessary) for clarity, performance, and maintainability, ensuring all tests still pass.
+    - **AI Agent Role in TDD:**
+        - When tasked with a new feature, agents should, where possible, generate test skeletons or initial failing tests based on the requirements.
+        - If detailed test cases are provided, agents should implement code to satisfy these tests.
+        - If requirements are high-level, agents should ask for clarification on testable scenarios or propose test cases.
+        - All new functional code must be accompanied by corresponding tests.
+    - **Test Coverage:** Aim for comprehensive test coverage. While specific percentage targets may vary, all critical paths and business logic must be tested.
 
 - **NestJS MVC Architecture:** The project follows NestJS's opinionated Model-View-Controller (MVC) architecture. Agents must generate code that aligns with this pattern. New modules, controllers, services, and providers should follow NestJS conventions.
 - **TypeScript Strict Mode:** The project uses TypeScript with strict mode enabled. Agents must generate type-safe code and leverage TypeScript's features to enhance code quality and maintainability.
@@ -36,12 +50,25 @@ Agents should follow a clear and objective style for commit messages and documen
 
 **Commit Message Example:**
 
+A good commit message should clearly indicate the scope of changes, including tests.
+
+*Example 1: Initial feature commit with tests*
 ```
 feat: Add User Profile Endpoint
 
 Implemented the GET /users/:id endpoint to retrieve user profile information.
-Includes service logic, DTOs, and unit tests.
+Includes defining tests for user profile retrieval, service logic, and DTOs.
+All tests for the new endpoint are passing.
 Updated AGENTS.md and docs/SCHEMA.md to reflect the new User entity fields.
+```
+
+*Example 2: Commit for a bug fix driven by a new test*
+```
+fix: Correct calculation for order total
+
+Added a test case for orders with multiple discounted items, which previously failed.
+Modified the order service to accurately calculate totals under these conditions.
+All related tests now pass.
 ```
 
 **Documentation Update Example (in `docs/SCHEMA.md`):**
