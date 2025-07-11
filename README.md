@@ -110,6 +110,14 @@ A `Dockerfile` is included in the project root to define the build steps for the
         npm run start
         ```
 
+### Initial Data Seeding
+
+Upon application startup, the system automatically seeds essential data if it's not already present. Currently, this includes:
+
+-   **Default User Roles:** Admin, Manager, and Assistant roles with their predefined permissions are created in the database. This process is idempotent and will not create duplicate roles if they already exist.
+
+This ensures that the application has the necessary foundational data to operate correctly from the first run.
+
 ## Running Tests
 
 To run the test suites:
