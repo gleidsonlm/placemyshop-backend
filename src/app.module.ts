@@ -17,10 +17,6 @@ import { BusinessesModule } from './businesses/businesses.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService): MongooseModuleOptions => ({
         uri: configService.get<string>('MONGODB_URI'),
-        // Consider adding other Mongoose options here if needed, e.g.,
-        // autoIndex: process.env.NODE_ENV !== 'production', // good for development
-        // useNewUrlParser: true, // Deprecated but sometimes needed for older setups
-        // useUnifiedTopology: true, // Deprecated
       }),
       inject: [ConfigService],
     }),
