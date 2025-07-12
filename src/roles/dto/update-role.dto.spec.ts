@@ -38,17 +38,24 @@ describe('UpdateRoleDto', () => {
       dto.roleName = 'INVALID_ROLENAME_UPDATE' as RoleName;
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.find(e => e.property === 'roleName')?.constraints?.isEnum).toBeDefined();
+      expect(
+        errors.find((e) => e.property === 'roleName')?.constraints?.isEnum,
+      ).toBeDefined();
     });
   });
 
   describe('permissions', () => {
     it('should fail if permissions is provided and contains invalid enum values', async () => {
       const dto = new UpdateRoleDto();
-      dto.permissions = [Permission.MANAGE_USER_ROLES, 'INVALID_PERMISSION_UPDATE' as Permission];
+      dto.permissions = [
+        Permission.MANAGE_USER_ROLES,
+        'INVALID_PERMISSION_UPDATE' as Permission,
+      ];
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.find(e => e.property === 'permissions')?.constraints?.isEnum).toBeDefined();
+      expect(
+        errors.find((e) => e.property === 'permissions')?.constraints?.isEnum,
+      ).toBeDefined();
     });
 
     it('should pass if permissions is an empty array', async () => {

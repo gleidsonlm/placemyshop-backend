@@ -1,13 +1,14 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
-import { getModelToken, MongooseModule } from '@nestjs/mongoose';
+import { getModelToken } from '@nestjs/mongoose';
 import { Role } from './roles/schemas/role.schema';
 import { RoleSeedingService } from './roles/role-seeding.service';
 import { Person } from './users/schemas/person.schema';
 import { Business } from './businesses/schemas/business.schema';
 
 // Mock MongooseModule to avoid database connection
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('@nestjs/mongoose', () => ({
   ...jest.requireActual('@nestjs/mongoose'),
   MongooseModule: {
@@ -26,7 +27,6 @@ jest.mock('@nestjs/mongoose', () => ({
 
 describe('AppModule', () => {
   let testingModule: TestingModule;
-  let app: any; // For potential e2e-like checks if needed, or just for compilation
 
   beforeEach(async () => {
     const mockConfigService = {
@@ -41,33 +41,49 @@ describe('AppModule', () => {
     testingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-    .overrideProvider(ConfigService)
-    .useValue(mockConfigService)
-    .useMocker((token) => {
-      const roleModelToken = getModelToken(Role.name);
-      const personModelToken = getModelToken(Person.name);
-      const businessModelToken = getModelToken(Business.name);
+      .overrideProvider(ConfigService)
+      .useValue(mockConfigService)
+      .useMocker((token) => {
+        const roleModelToken = getModelToken(Role.name);
+        const personModelToken = getModelToken(Person.name);
+        const businessModelToken = getModelToken(Business.name);
 
-      if (token === roleModelToken || token === personModelToken || token === businessModelToken) {
-        // Create a mock Mongoose model
-        const mockModel: any = jest.fn().mockImplementation((dto: any) => ({
-          ...dto,
-          save: jest.fn().mockResolvedValue(dto),
-        }));
-        
-        // Add static methods that Mongoose models have
-        mockModel.findOne = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
-        mockModel.findById = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
-        mockModel.find = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
-        mockModel.create = jest.fn().mockResolvedValue({});
-        
-        return mockModel;
-      }
+        if (
+          token === roleModelToken ||
+          token === personModelToken ||
+          token === businessModelToken
+        ) {
+          // Create a mock Mongoose model
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
+          const mockModel = jest.fn().mockImplementation((dto: any) => ({
+            ...dto,
+            save: jest.fn().mockResolvedValue(dto),
+          })) as any;
 
-      // For any other dependencies, return a basic mock
-      return {};
-    })
-    .compile();
+          // Add static methods that Mongoose models have
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          mockModel.findOne = jest
+            .fn()
+            .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          mockModel.findById = jest
+            .fn()
+            .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          mockModel.find = jest
+            .fn()
+            .mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          mockModel.create = jest.fn().mockResolvedValue({});
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return mockModel;
+        }
+
+        // For any other dependencies, return a basic mock
+        return {};
+      })
+      .compile();
   });
 
   // afterEach(async () => {

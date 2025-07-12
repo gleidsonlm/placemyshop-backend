@@ -22,7 +22,10 @@ describe('UpdateBusinessDto', () => {
     const transformedDto = plainToClass(UpdateBusinessDto, dto);
     const errors = await validate(transformedDto);
     if (errors.length > 0) {
-      console.log('Validation errors for "UpdateBusinessDto all fields":', JSON.stringify(errors, null, 2));
+      console.log(
+        'Validation errors for "UpdateBusinessDto all fields":',
+        JSON.stringify(errors, null, 2),
+      );
     }
     expect(errors.length).toBe(0);
   });
@@ -47,7 +50,9 @@ describe('UpdateBusinessDto', () => {
       dto.email = 'not-an-email-update';
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.find(e => e.property === 'email')?.constraints?.isEmail).toBeDefined();
+      expect(
+        errors.find((e) => e.property === 'email')?.constraints?.isEmail,
+      ).toBeDefined();
     });
   });
 
@@ -57,7 +62,9 @@ describe('UpdateBusinessDto', () => {
       dto.url = 'not-a-url-update';
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.find(e => e.property === 'url')?.constraints?.isUrl).toBeDefined();
+      expect(
+        errors.find((e) => e.property === 'url')?.constraints?.isUrl,
+      ).toBeDefined();
     });
   });
 
@@ -67,12 +74,17 @@ describe('UpdateBusinessDto', () => {
       dto.sameAs = ['http://validupdate.com', 'not-a-url-for-update'];
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const sameAsError = errors.find(e => e.property === 'sameAs');
+      const sameAsError = errors.find((e) => e.property === 'sameAs');
       if (sameAsError) {
-        console.log('UpdateBusinessDto sameAsError structure:', JSON.stringify(sameAsError, null, 2));
+        console.log(
+          'UpdateBusinessDto sameAsError structure:',
+          JSON.stringify(sameAsError, null, 2),
+        );
       }
       expect(sameAsError).toBeDefined();
-      expect(sameAsError?.constraints?.isUrl).toContain('each value in sameAs must be a URL address');
+      expect(sameAsError?.constraints?.isUrl).toContain(
+        'each value in sameAs must be a URL address',
+      );
     });
   });
 
@@ -86,7 +98,10 @@ describe('UpdateBusinessDto', () => {
       const transformedDto = plainToClass(UpdateBusinessDto, dto);
       const errors = await validate(transformedDto);
       if (errors.length > 0) {
-        console.log('Validation errors for "UpdateBusinessDto nested PostalAddressDto":', JSON.stringify(errors, null, 2));
+        console.log(
+          'Validation errors for "UpdateBusinessDto nested PostalAddressDto":',
+          JSON.stringify(errors, null, 2),
+        );
       }
       expect(errors.length).toBe(0);
     });

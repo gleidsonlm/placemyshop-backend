@@ -9,5 +9,6 @@ import { UsersService } from './users.service';
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService], // Export service for use in other modules (like auth)
+
 })
 export class UsersModule {}
