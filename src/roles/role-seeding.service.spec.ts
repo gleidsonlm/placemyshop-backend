@@ -14,7 +14,7 @@ jest.mock('@nestjs/common/services/logger.service');
 
 // Define a base mock for save outside, so we can track its calls across instances
 const mockSave = jest.fn();
-const mockRoleInstance = (dto: unknown) => ({
+const mockRoleInstance = (dto: any) => ({
   ...dto,
   save: mockSave, // All instances will share this mockSave
 });

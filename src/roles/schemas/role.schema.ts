@@ -72,7 +72,8 @@ RoleSchema.virtual('dateModified').get(function (this: RoleDocument) {
 
 RoleSchema.set('toJSON', {
   virtuals: true,
-  transform: function (doc: RoleDocument, ret: Record<string, unknown>) {
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+  transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org'; // Or appropriate context if not schema.org
     ret['@type'] = 'Role';
 
@@ -84,7 +85,7 @@ RoleSchema.set('toJSON', {
       ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
     } else if (doc._id) {
       // Mongoose Document _id
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+
       ret['@id'] = doc._id.toString();
     }
 
@@ -118,7 +119,7 @@ RoleSchema.methods.softDelete = function (this: RoleDocument) {
 };
 
 RoleSchema.methods.restore = function (this: RoleDocument) {
-  this.deletedAt = null;
+  this.deletedAt = undefined;
   this.isDeleted = false;
   return this.save();
 };

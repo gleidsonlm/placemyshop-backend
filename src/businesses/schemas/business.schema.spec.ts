@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 import {
   getModelToken,
   MongooseModule,
@@ -188,7 +189,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
         'businessJSON.founder (populated test):',
         JSON.stringify(businessJSON.founder, null, 2),
       );
-      const founderAsAny = businessJSON.founder as Record<string, unknown>;
+      const founderAsAny = businessJSON.founder as any;
 
       expect(founderAsAny).toBeDefined();
       expect(founderAsAny['@type']).toEqual('Person');
@@ -208,7 +209,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       }).save();
 
       const businessJSON = business.toJSON({ virtuals: true });
-      const founderAsAny = businessJSON.founder as Record<string, unknown>;
+      const founderAsAny = businessJSON.founder as any;
 
       expect(founderAsAny).toBeDefined();
       expect(founderAsAny['@type']).toEqual('Person');

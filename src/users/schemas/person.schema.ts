@@ -86,8 +86,8 @@ PersonSchema.virtual('dateModified').get(function (this: PersonDocument) {
 // Ensure virtuals are included in toJSON and toObject outputs
 PersonSchema.set('toJSON', {
   virtuals: true,
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-base-to-string */
-  transform: function (doc: PersonDocument, ret: Record<string, unknown>) {
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+  transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org';
     ret['@type'] = 'Person';
 
@@ -211,7 +211,7 @@ PersonSchema.methods.softDelete = function (this: PersonDocument) {
 // Add a method for restoring a soft-deleted document
 
 PersonSchema.methods.restore = function (this: PersonDocument) {
-  this.deletedAt = null;
+  this.deletedAt = undefined;
   this.isDeleted = false;
   return this.save();
 };

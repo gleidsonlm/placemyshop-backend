@@ -54,24 +54,29 @@ describe('AppModule', () => {
           token === businessModelToken
         ) {
           // Create a mock Mongoose model
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          const mockModel = jest.fn().mockImplementation((dto: unknown) => ({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
+          const mockModel = jest.fn().mockImplementation((dto: any) => ({
             ...dto,
             save: jest.fn().mockResolvedValue(dto),
-          }));
+          })) as any;
 
           // Add static methods that Mongoose models have
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           mockModel.findOne = jest
             .fn()
             .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           mockModel.findById = jest
             .fn()
             .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           mockModel.find = jest
             .fn()
             .mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           mockModel.create = jest.fn().mockResolvedValue({});
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return mockModel;
         }
 

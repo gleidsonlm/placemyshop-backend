@@ -101,7 +101,8 @@ BusinessSchema.virtual('dateModified').get(function (this: BusinessDocument) {
 BusinessSchema.set('toJSON', {
   virtuals: true,
   getters: true,
-  transform: function (doc: BusinessDocument, ret: Record<string, unknown>) {
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+  transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org';
     // '@type' is already handled by a direct Prop default: 'LocalBusiness'
     // but ensure it's present in the final 'ret' object
@@ -117,7 +118,6 @@ BusinessSchema.set('toJSON', {
     ) {
       ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
     } else if (doc._id) {
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       ret['@id'] = doc._id.toString();
     }
 
@@ -215,7 +215,7 @@ BusinessSchema.methods.softDelete = function (this: BusinessDocument) {
 };
 
 BusinessSchema.methods.restore = function (this: BusinessDocument) {
-  this.deletedAt = null;
+  this.deletedAt = undefined;
   this.isDeleted = false;
   return this.save();
 };
