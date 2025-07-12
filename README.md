@@ -183,10 +183,61 @@ See `BUN_TESTING.md` for more details on Bun test compatibility.
 
 ## Documentation
 
-Further documentation is in progress and will adhere to the guidelines outlined in [`AGENTS.md`](./AGENTS.md). This includes detailed schema definitions in [`docs/SCHEMA.md`](./docs/SCHEMA.md) and API endpoint documentation.
+### API Documentation
 
-For guidelines on how AI coding agents should contribute to this project, please see [`AGENTS.md`](./AGENTS.md).
+The PlaceMyShop Backend provides comprehensive API documentation:
+
+- **Interactive Documentation**: Visit http://localhost:3000/api/docs for the Swagger UI
+  - Test endpoints directly in your browser
+  - View request/response schemas
+  - Authenticate and test protected routes
+  
+- **API Usage Guide**: [`docs/API_USAGE_GUIDE.md`](./docs/API_USAGE_GUIDE.md) - Complete guide with cURL examples
+  - Authentication workflows
+  - CRUD operations for all endpoints
+  - Common workflows and troubleshooting
+  - Best practices and security guidelines
+
+### Schema Documentation
+
+- **Data Models**: [`docs/SCHEMA.md`](./docs/SCHEMA.md) - Detailed schema definitions using JSON-LD format
+
+### AI Coding Agent Guidelines
+
+For guidelines on how AI coding agents should contribute to this project:
+- **General AI Agent Guidelines:** [`AGENTS.md`](./AGENTS.md) - Contains project standards, TDD practices, and general AI agent responsibilities
+- **GitHub Copilot Pro Guidelines:** [`COPILOT_AGENTS.md`](./COPILOT_AGENTS.md) - Specific guidance for using GitHub Copilot Pro effectively with our NestJS/TypeScript/MongoDB stack
 
 ## License
 
 This project is MIT licensed.
+
+## API Overview
+
+The PlaceMyShop Backend provides a comprehensive REST API for managing users, roles, and businesses:
+
+### Core Endpoints
+
+- **Authentication**: `/auth` - Login, logout, token refresh, user profile
+- **Users**: `/users` - User management with role-based access
+- **Roles**: `/roles` - Role and permission management
+- **Businesses**: `/businesses` - Business profile management
+
+### Key Features
+
+- **JWT Authentication** with refresh tokens
+- **Role-based access control** with granular permissions
+- **Comprehensive validation** and error handling
+- **Pagination** support for list endpoints
+- **Soft delete** functionality with restore capabilities
+- **RESTful API design** following best practices
+- **Interactive API documentation** with Swagger/OpenAPI
+
+### Quick Start
+
+1. Start the application (see setup instructions above)
+2. Visit http://localhost:3000/api/docs for interactive documentation
+3. Use the login endpoint to authenticate and get JWT tokens
+4. Explore the API using the Swagger UI or cURL examples in the usage guide
+
+For detailed examples and workflows, see [`docs/API_USAGE_GUIDE.md`](./docs/API_USAGE_GUIDE.md).
