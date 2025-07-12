@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { RoleSeedingService } from './role-seeding.service';
@@ -222,6 +223,7 @@ describe('RoleSeedingService', () => {
       // This relies on the auto-mocking behavior of jest.mock('@nestjs/common').
       // All instances of Logger will have their methods as jest.fn().
       // We can check the mock calls on Logger itself if it's a static method, or on its prototype for instance methods.
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         `Error seeding role "${RoleName.MANAGER}": ${error.message}`,
         error.stack,

@@ -30,8 +30,12 @@ export enum RoleName {
 export interface RoleDocument extends Role, Document {
   createdAt: Date;
   updatedAt: Date;
-  softDelete(): Promise<this & Document<unknown, {}, RoleDocument>>;
-  restore(): Promise<this & Document<unknown, {}, RoleDocument>>;
+  softDelete(): Promise<
+    this & Document<unknown, Record<string, unknown>, RoleDocument>
+  >;
+  restore(): Promise<
+    this & Document<unknown, Record<string, unknown>, RoleDocument>
+  >;
 }
 
 @Schema({ timestamps: true, collection: 'roles' })
@@ -106,13 +110,14 @@ RoleSchema.index(
 );
 
 // Soft delete methods
-RoleSchema.methods.softDelete = function () {
+
+RoleSchema.methods.softDelete = function (this: RoleDocument) {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
-RoleSchema.methods.restore = function () {
+RoleSchema.methods.restore = function (this: RoleDocument) {
   this.deletedAt = null;
   this.isDeleted = false;
   return this.save();

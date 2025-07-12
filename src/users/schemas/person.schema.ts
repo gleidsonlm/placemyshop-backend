@@ -16,8 +16,12 @@ export enum PersonStatus {
 export interface PersonDocument extends Person, Document {
   createdAt: Date;
   updatedAt: Date;
-  softDelete(): Promise<this & Document<unknown, {}, PersonDocument>>; // Add method signatures
-  restore(): Promise<this & Document<unknown, {}, PersonDocument>>;
+  softDelete(): Promise<
+    this & Document<unknown, Record<string, unknown>, PersonDocument>
+  >; // Add method signatures
+  restore(): Promise<
+    this & Document<unknown, Record<string, unknown>, PersonDocument>
+  >;
 }
 
 @Schema({ timestamps: true, collection: 'persons' })
@@ -82,6 +86,7 @@ PersonSchema.virtual('dateModified').get(function (this: PersonDocument) {
 // Ensure virtuals are included in toJSON and toObject outputs
 PersonSchema.set('toJSON', {
   virtuals: true,
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-base-to-string */
   transform: function (doc: PersonDocument, ret: Record<string, unknown>) {
     ret['@context'] = 'https://schema.org';
     ret['@type'] = 'Person';
@@ -93,11 +98,11 @@ PersonSchema.set('toJSON', {
     ) {
       ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
     } else if (doc._id) {
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       ret['@id'] = doc._id.toString();
     }
 
     // Customize the 'role' field output
+
     if (ret.role && typeof ret.role === 'object') {
       // Check if role is populated (object)
       const roleDoc = doc.role;

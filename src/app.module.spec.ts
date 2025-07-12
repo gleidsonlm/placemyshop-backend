@@ -8,6 +8,7 @@ import { Person } from './users/schemas/person.schema';
 import { Business } from './businesses/schemas/business.schema';
 
 // Mock MongooseModule to avoid database connection
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('@nestjs/mongoose', () => ({
   ...jest.requireActual('@nestjs/mongoose'),
   MongooseModule: {
@@ -53,6 +54,7 @@ describe('AppModule', () => {
           token === businessModelToken
         ) {
           // Create a mock Mongoose model
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           const mockModel = jest.fn().mockImplementation((dto: unknown) => ({
             ...dto,
             save: jest.fn().mockResolvedValue(dto),
