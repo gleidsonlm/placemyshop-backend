@@ -96,85 +96,62 @@ BusinessSchema.virtual('dateModified').get(function(this: BusinessDocument) {
 BusinessSchema.set('toJSON', {
   virtuals: true,
   getters: true,
-  transform: function (doc: any, ret: any) {
+  transform: (doc: BusinessDocument, ret: Partial<BusinessDocument>) => {
     ret['@context'] = 'https://schema.org';
-    // '@type' is already handled by a direct Prop default: 'LocalBusiness'
-    // but ensure it's present in the final 'ret' object
-    if (!ret['@type']) {
-        ret['@type'] = doc['@type'] || 'LocalBusiness';
-    }
+    ret['@type'] = ret['@type'] || 'LocalBusiness';
 
-    // Ensure the main document's @id is correctly set
-    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
-      ret['@id'] = doc['@id'];
-    } else if (doc._id) {
-      ret['@id'] = doc._id.toString();
-    }
+    // Ensure @id is set, preferring the schema's @id over the mongo _id
+    ret['@id'] = doc['@id'] || doc._id.toString();
 
-    // Customize the 'founder' field output
+    // Simplify founder representation
     if (ret.founder) {
-      const founderDoc = doc.founder; // Original populated document or ObjectId
-      let founderIdValue = '';
-
-      if (founderDoc && typeof founderDoc === 'object') { // Populated
-        if (typeof founderDoc['@id'] === 'string' && founderDoc['@id'].length > 0) {
-          founderIdValue = founderDoc['@id'];
-        } else if (founderDoc._id) {
-          founderIdValue = founderDoc._id.toString();
-        }
-      } else if (founderDoc) { // ObjectId or string ID
-        founderIdValue = founderDoc.toString();
+      const founder = doc.founder;
+      let founderId = '';
+      if (founder && typeof founder === 'object') {
+        // Populated document
+        founderId = founder['@id'] || founder._id.toString();
+      } else if (founder) {
+        // ObjectId or string
+        founderId = founder.toString();
       }
 
-      if (founderIdValue) {
-        ret.founder = {
-          '@type': 'Person',
-          '@id': founderIdValue,
-        };
-      } else if (typeof ret.founder === 'object' && ret.founder['@id']) {
-        // If Person's toJSON already transformed it and put an '@id'
-         ret.founder = {
-          '@type': 'Person',
-          '@id': ret.founder['@id'],
-        };
-      } else if (ret.founder) { // Fallback for non-object ID case
-         ret.founder = {
-          '@type': 'Person',
-          '@id': ret.founder.toString(),
-        };
-      }
+      ret.founder = {
+        '@type': 'Person',
+        '@id': founderId,
+      };
     }
 
-    // Ensure PostalAddress gets its @type if it's not automatically included by sub-schema toJSON
-    if (ret.address && typeof ret.address === 'object' && !ret.address['@type']) {
-        ret.address['@type'] = 'PostalAddress';
+    // Set @type for address if it exists
+    if (ret.address) {
+      ret.address['@type'] = 'PostalAddress';
     }
 
-    // Ensure dateCreated and dateModified are using the virtuals
+    // Copy virtuals to the final object
     ret.dateCreated = doc.dateCreated;
     ret.dateModified = doc.dateModified;
 
-    // delete ret.__v;
-    // delete ret._id;
+    // Remove mongoose specific fields
+    delete ret.__v;
+    delete ret._id;
+
     return ret;
   },
 });
+
 BusinessSchema.set('toObject', { virtuals: true, getters: true });
 
 // Indexes
 BusinessSchema.index({ isDeleted: 1, name: 1 });
 BusinessSchema.index({ isDeleted: 1, '@id': 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
-// Consider geospatial index if address.geolocation is added later
-// e.g., BusinessSchema.index({ 'address.location': '2dsphere' });
 
-// Soft delete methods
-BusinessSchema.methods.softDelete = function() {
+// Soft delete and restore methods using arrow functions
+BusinessSchema.methods.softDelete = function (this: BusinessDocument): Promise<BusinessDocument> {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
-BusinessSchema.methods.restore = function() {
+BusinessSchema.methods.restore = function (this: BusinessDocument): Promise<BusinessDocument> {
   this.deletedAt = null;
   this.isDeleted = false;
   return this.save();
