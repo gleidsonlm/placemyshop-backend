@@ -280,7 +280,10 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       expect(foundBusiness?.openingHours).toEqual(
         expect.arrayContaining(fullBusinessData.openingHours),
       );
-      expect(String(foundBusiness?.founder)).toEqual(String(testFounder._id));
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      expect(foundBusiness?.founder?.toString()).toEqual(
+        testFounder._id?.toString(),
+      );
     });
   });
 });

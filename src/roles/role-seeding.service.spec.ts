@@ -1,10 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { RoleSeedingService } from './role-seeding.service';
 import {
   Role,
-  RoleDocument,
   RoleName,
   getDefaultPermissionsForRole,
 } from './schemas/role.schema';
@@ -15,7 +13,7 @@ jest.mock('@nestjs/common/services/logger.service');
 
 // Define a base mock for save outside, so we can track its calls across instances
 const mockSave = jest.fn();
-const mockRoleInstance = (dto: any) => ({
+const mockRoleInstance = (dto: unknown) => ({
   ...dto,
   save: mockSave, // All instances will share this mockSave
 });
@@ -24,13 +22,14 @@ const mockRoleInstance = (dto: any) => ({
 const MockRoleModelCtor = jest.fn().mockImplementation(mockRoleInstance);
 
 // Static methods like findOne, find, etc., are attached to the constructor itself
-(MockRoleModelCtor as any).findOne = jest.fn().mockReturnValue({
-  exec: jest.fn().mockResolvedValue(null),
-});
+(MockRoleModelCtor as unknown as Record<string, unknown>).findOne = jest
+  .fn()
+  .mockReturnValue({
+    exec: jest.fn().mockResolvedValue(null),
+  });
 
 describe('RoleSeedingService', () => {
   let service: RoleSeedingService;
-  let modelMock: typeof MockRoleModelCtor;
 
   beforeEach(async () => {
     // Clear all previous mock calls and implementations for all mocks
@@ -60,9 +59,7 @@ describe('RoleSeedingService', () => {
     }).compile();
 
     service = module.get<RoleSeedingService>(RoleSeedingService);
-    // modelMock here is actually the MockRoleModelCtor because that's what useValue is.
-    // This is fine as the service uses `new this.roleModel()` and `this.roleModel.findOne()`
-    modelMock = module.get<typeof MockRoleModelCtor>(getModelToken(Role.name));
+    // MockRoleModelCtor is used by the service via dependency injection
   });
 
   it('should be defined', () => {

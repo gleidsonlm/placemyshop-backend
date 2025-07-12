@@ -117,7 +117,8 @@ BusinessSchema.set('toJSON', {
     ) {
       ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
     } else if (doc._id) {
-      ret['@id'] = String(doc._id);
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      ret['@id'] = doc._id.toString();
     }
 
     // Customize the 'founder' field output
@@ -134,11 +135,15 @@ BusinessSchema.set('toJSON', {
         ) {
           founderIdValue = String(founderRecord['@id']);
         } else if (founderRecord._id) {
-          founderIdValue = String(founderRecord._id);
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string
+          founderIdValue = founderRecord._id.toString();
         }
       } else if (founderDoc) {
         // ObjectId or string ID
-        founderIdValue = String(founderDoc);
+        founderIdValue =
+          typeof founderDoc === 'string'
+            ? founderDoc
+            : (founderDoc as { toString(): string }).toString();
       }
 
       if (founderIdValue) {
@@ -160,7 +165,10 @@ BusinessSchema.set('toJSON', {
         // Fallback for non-object ID case
         ret.founder = {
           '@type': 'Person',
-          '@id': String(ret.founder),
+          '@id':
+            typeof ret.founder === 'string'
+              ? ret.founder
+              : (ret.founder as { toString(): string }).toString(),
         };
       }
     }
