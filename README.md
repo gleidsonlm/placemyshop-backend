@@ -183,9 +183,13 @@ See `BUN_TESTING.md` for more details on Bun test compatibility.
 
 ## Documentation
 
-Further documentation is in progress and will adhere to the guidelines outlined in [`AGENTS.md`](./AGENTS.md). This includes detailed schema definitions in [`docs/SCHEMA.md`](./docs/SCHEMA.md) and API endpoint documentation.
+Further documentation is in progress and will adhere to the guidelines outlined in our AI agent documentation. This includes detailed schema definitions in [`docs/SCHEMA.md`](./docs/SCHEMA.md) and API endpoint documentation.
 
-For guidelines on how AI coding agents should contribute to this project, please see [`AGENTS.md`](./AGENTS.md).
+### AI Coding Agent Guidelines
+
+For guidelines on how AI coding agents should contribute to this project:
+- **General AI Agent Guidelines:** [`AGENTS.md`](./AGENTS.md) - Contains project standards, TDD practices, and general AI agent responsibilities
+- **GitHub Copilot Pro Guidelines:** [`COPILOT_AGENTS.md`](./COPILOT_AGENTS.md) - Specific guidance for using GitHub Copilot Pro effectively with our NestJS/TypeScript/MongoDB stack
 
 ## License
 
