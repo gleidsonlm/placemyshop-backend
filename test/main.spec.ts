@@ -35,6 +35,7 @@ describe('main.ts - bootstrap function', () => {
 
   it('should create Nest application with AppModule', async () => {
     await bootstrap();
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(NestFactory.create).toHaveBeenCalledWith(AppModule);
   });
 

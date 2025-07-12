@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
-import { getModelToken, MongooseModule } from '@nestjs/mongoose';
+import { getModelToken } from '@nestjs/mongoose';
 import { Role } from './roles/schemas/role.schema';
 import { RoleSeedingService } from './roles/role-seeding.service';
 import { Person } from './users/schemas/person.schema';
@@ -26,7 +26,6 @@ jest.mock('@nestjs/mongoose', () => ({
 
 describe('AppModule', () => {
   let testingModule: TestingModule;
-  let app: any; // For potential e2e-like checks if needed, or just for compilation
 
   beforeEach(async () => {
     const mockConfigService = {
@@ -54,7 +53,7 @@ describe('AppModule', () => {
           token === businessModelToken
         ) {
           // Create a mock Mongoose model
-          const mockModel: any = jest.fn().mockImplementation((dto: any) => ({
+          const mockModel = jest.fn().mockImplementation((dto: unknown) => ({
             ...dto,
             save: jest.fn().mockResolvedValue(dto),
           }));

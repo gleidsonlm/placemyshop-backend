@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types, Model } from 'mongoose'; // Import Model
+import { Document, Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { Person } from '../../users/schemas/person.schema'; // Import Person type
 
@@ -33,8 +33,12 @@ export const PostalAddressSchema = SchemaFactory.createForClass(PostalAddress);
 export interface BusinessDocument extends Business, Document {
   createdAt: Date;
   updatedAt: Date;
-  softDelete(): Promise<this & Document<unknown, {}, BusinessDocument>>;
-  restore(): Promise<this & Document<unknown, {}, BusinessDocument>>;
+  softDelete(): Promise<
+    this & Document<unknown, Record<string, unknown>, BusinessDocument>
+  >;
+  restore(): Promise<
+    this & Document<unknown, Record<string, unknown>, BusinessDocument>
+  >;
 }
 
 @Schema({ timestamps: true, collection: 'businesses' })
@@ -97,39 +101,44 @@ BusinessSchema.virtual('dateModified').get(function (this: BusinessDocument) {
 BusinessSchema.set('toJSON', {
   virtuals: true,
   getters: true,
-  transform: function (doc: any, ret: any) {
+  transform: function (doc: BusinessDocument, ret: Record<string, unknown>) {
     ret['@context'] = 'https://schema.org';
     // '@type' is already handled by a direct Prop default: 'LocalBusiness'
     // but ensure it's present in the final 'ret' object
     if (!ret['@type']) {
-      ret['@type'] = doc['@type'] || 'LocalBusiness';
+      ret['@type'] =
+        (doc as unknown as Record<string, unknown>)['@type'] || 'LocalBusiness';
     }
 
     // Ensure the main document's @id is correctly set
-    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
-      ret['@id'] = doc['@id'];
+    if (
+      typeof (doc as unknown as Record<string, unknown>)['@id'] === 'string' &&
+      String((doc as unknown as Record<string, unknown>)['@id']).length > 0
+    ) {
+      ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
     } else if (doc._id) {
-      ret['@id'] = doc._id.toString();
+      ret['@id'] = String(doc._id);
     }
 
     // Customize the 'founder' field output
     if (ret.founder) {
-      const founderDoc = doc.founder; // Original populated document or ObjectId
+      const founderDoc = doc.founder as unknown; // Original populated document or ObjectId
       let founderIdValue = '';
 
       if (founderDoc && typeof founderDoc === 'object') {
         // Populated
+        const founderRecord = founderDoc as Record<string, unknown>;
         if (
-          typeof founderDoc['@id'] === 'string' &&
-          founderDoc['@id'].length > 0
+          typeof founderRecord['@id'] === 'string' &&
+          String(founderRecord['@id']).length > 0
         ) {
-          founderIdValue = founderDoc['@id'];
-        } else if (founderDoc._id) {
-          founderIdValue = founderDoc._id.toString();
+          founderIdValue = String(founderRecord['@id']);
+        } else if (founderRecord._id) {
+          founderIdValue = String(founderRecord._id);
         }
       } else if (founderDoc) {
         // ObjectId or string ID
-        founderIdValue = founderDoc.toString();
+        founderIdValue = String(founderDoc);
       }
 
       if (founderIdValue) {
@@ -137,17 +146,21 @@ BusinessSchema.set('toJSON', {
           '@type': 'Person',
           '@id': founderIdValue,
         };
-      } else if (typeof ret.founder === 'object' && ret.founder['@id']) {
+      } else if (
+        typeof ret.founder === 'object' &&
+        ret.founder &&
+        (ret.founder as Record<string, unknown>)['@id']
+      ) {
         // If Person's toJSON already transformed it and put an '@id'
         ret.founder = {
           '@type': 'Person',
-          '@id': ret.founder['@id'],
+          '@id': (ret.founder as Record<string, unknown>)['@id'],
         };
       } else if (ret.founder) {
         // Fallback for non-object ID case
         ret.founder = {
           '@type': 'Person',
-          '@id': ret.founder.toString(),
+          '@id': String(ret.founder),
         };
       }
     }
@@ -156,14 +169,18 @@ BusinessSchema.set('toJSON', {
     if (
       ret.address &&
       typeof ret.address === 'object' &&
-      !ret.address['@type']
+      !(ret.address as Record<string, unknown>)['@type']
     ) {
-      ret.address['@type'] = 'PostalAddress';
+      (ret.address as Record<string, unknown>)['@type'] = 'PostalAddress';
     }
 
     // Ensure dateCreated and dateModified are using the virtuals
-    ret.dateCreated = doc.dateCreated;
-    ret.dateModified = doc.dateModified;
+    const docWithVirtuals = doc as unknown as {
+      dateCreated: unknown;
+      dateModified: unknown;
+    };
+    ret.dateCreated = docWithVirtuals.dateCreated;
+    ret.dateModified = docWithVirtuals.dateModified;
 
     // delete ret.__v;
     // delete ret._id;
@@ -182,13 +199,14 @@ BusinessSchema.index(
 // e.g., BusinessSchema.index({ 'address.location': '2dsphere' });
 
 // Soft delete methods
-BusinessSchema.methods.softDelete = function () {
+
+BusinessSchema.methods.softDelete = function (this: BusinessDocument) {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
-BusinessSchema.methods.restore = function () {
+BusinessSchema.methods.restore = function (this: BusinessDocument) {
   this.deletedAt = null;
   this.isDeleted = false;
   return this.save();

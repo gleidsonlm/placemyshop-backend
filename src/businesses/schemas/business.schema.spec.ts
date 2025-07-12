@@ -5,18 +5,8 @@ import {
 } from '@nestjs/mongoose'; // Import getConnectionToken
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import {
-  Connection,
-  Model,
-  Types,
-  Document as MongooseDocument,
-} from 'mongoose';
-import {
-  Business,
-  BusinessSchema,
-  BusinessDocument,
-  PostalAddress,
-} from './business.schema';
+import { Connection, Model } from 'mongoose';
+import { Business, BusinessSchema, BusinessDocument } from './business.schema';
 import {
   Person,
   PersonSchema,
@@ -198,7 +188,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
         'businessJSON.founder (populated test):',
         JSON.stringify(businessJSON.founder, null, 2),
       );
-      const founderAsAny = businessJSON.founder as any;
+      const founderAsAny = businessJSON.founder as Record<string, unknown>;
 
       expect(founderAsAny).toBeDefined();
       expect(founderAsAny['@type']).toEqual('Person');
@@ -206,7 +196,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       // console.log(`Business spec - Expected testFounder['@id']: ${testFounder['@id']}, testFounder._id: ${testFounder._id!.toString()}`);
       expect(typeof founderAsAny['@id']).toBe('string');
       expect(founderAsAny['@id']).toEqual(
-        testFounder['@id'] || testFounder._id!.toString(),
+        testFounder['@id'] || String(testFounder._id),
       );
       expect(founderAsAny.passwordHash).toBeUndefined();
     });
@@ -218,11 +208,11 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       }).save();
 
       const businessJSON = business.toJSON({ virtuals: true });
-      const founderAsAny = businessJSON.founder as any;
+      const founderAsAny = businessJSON.founder as Record<string, unknown>;
 
       expect(founderAsAny).toBeDefined();
       expect(founderAsAny['@type']).toEqual('Person');
-      expect(founderAsAny['@id']).toEqual(testFounder._id!.toString());
+      expect(founderAsAny['@id']).toEqual(String(testFounder._id));
     });
 
     it('should correctly serialize PostalAddress if present', async () => {
@@ -290,9 +280,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       expect(foundBusiness?.openingHours).toEqual(
         expect.arrayContaining(fullBusinessData.openingHours),
       );
-      expect(foundBusiness?.founder.toString()).toEqual(
-        testFounder._id!.toString(),
-      );
+      expect(String(foundBusiness?.founder)).toEqual(String(testFounder._id));
     });
   });
 });
