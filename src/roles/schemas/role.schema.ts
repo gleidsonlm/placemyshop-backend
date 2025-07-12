@@ -58,24 +58,25 @@ export class Role {
 
 export const RoleSchema = SchemaFactory.createForClass(Role);
 
-RoleSchema.virtual('dateCreated').get(function(this: RoleDocument) {
+RoleSchema.virtual('dateCreated').get(function (this: RoleDocument) {
   return this.createdAt;
 });
 
-RoleSchema.virtual('dateModified').get(function(this: RoleDocument) {
+RoleSchema.virtual('dateModified').get(function (this: RoleDocument) {
   return this.updatedAt;
 });
 
 RoleSchema.set('toJSON', {
   virtuals: true,
-  transform: function(doc: any, ret: any) {
+  transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org'; // Or appropriate context if not schema.org
     ret['@type'] = 'Role';
 
     // Ensure the main document's @id is correctly set
     if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
       ret['@id'] = doc['@id'];
-    } else if (doc._id) { // Mongoose Document _id
+    } else if (doc._id) {
+      // Mongoose Document _id
       ret['@id'] = doc._id.toString();
     }
 
@@ -86,30 +87,37 @@ RoleSchema.set('toJSON', {
     // delete ret._id;
     // delete ret.__v;
     return ret;
-  }
+  },
 });
 RoleSchema.set('toObject', { virtuals: true });
 
 // Indexes
-RoleSchema.index({ isDeleted: 1, roleName: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
-RoleSchema.index({ isDeleted: 1, '@id': 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
-
+RoleSchema.index(
+  { isDeleted: 1, roleName: 1 },
+  { unique: true, partialFilterExpression: { isDeleted: false } },
+);
+RoleSchema.index(
+  { isDeleted: 1, '@id': 1 },
+  { unique: true, partialFilterExpression: { isDeleted: false } },
+);
 
 // Soft delete methods
-RoleSchema.methods.softDelete = function() {
+RoleSchema.methods.softDelete = function () {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
-RoleSchema.methods.restore = function() {
+RoleSchema.methods.restore = function () {
   this.deletedAt = null;
   this.isDeleted = false;
   return this.save();
 };
 
 // Helper to map RoleName to its default permissions
-export const getDefaultPermissionsForRole = (roleName: RoleName): Permission[] => {
+export const getDefaultPermissionsForRole = (
+  roleName: RoleName,
+): Permission[] => {
   switch (roleName) {
     case RoleName.ADMIN:
       return [

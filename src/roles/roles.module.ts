@@ -4,7 +4,9 @@ import { Role, RoleSchema } from './schemas/role.schema';
 import { RoleSeedingService } from './role-seeding.service';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Role.name, schema: RoleSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: Role.name, schema: RoleSchema }]),
+  ],
   controllers: [],
   providers: [RoleSeedingService], // Add RoleSeedingService to providers
   exports: [RoleSeedingService], // Export RoleSeedingService if it needs to be called from AppModule or other modules

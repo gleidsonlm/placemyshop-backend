@@ -1,4 +1,12 @@
-import { IsEmail, IsString, IsNotEmpty, IsOptional, IsEnum, MinLength, IsUUID } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  MinLength,
+  IsUUID,
+} from 'class-validator';
 import { PersonStatus } from '../schemas/person.schema';
 
 // As per schema.org/Person and issue requirements

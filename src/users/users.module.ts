@@ -3,7 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Person, PersonSchema } from './schemas/person.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Person.name, schema: PersonSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: Person.name, schema: PersonSchema }]),
+  ],
   // Add controllers and providers if/when they are created
   controllers: [],
   providers: [],

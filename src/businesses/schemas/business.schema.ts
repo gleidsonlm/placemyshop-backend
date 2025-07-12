@@ -7,7 +7,8 @@ import { Person } from '../../users/schemas/person.schema'; // Import Person typ
 // We'll use Types.ObjectId to reference the Person document for the founder.
 
 @Schema({ _id: false }) // No separate _id for PostalAddress, it's part of Business
-export class PostalAddress { // No longer extends Document directly, it's a sub-document
+export class PostalAddress {
+  // No longer extends Document directly, it's a sub-document
   @Prop({ default: 'PostalAddress' })
   '@type': string;
 
@@ -85,11 +86,11 @@ export class Business {
 
 export const BusinessSchema = SchemaFactory.createForClass(Business);
 
-BusinessSchema.virtual('dateCreated').get(function(this: BusinessDocument) {
+BusinessSchema.virtual('dateCreated').get(function (this: BusinessDocument) {
   return this.createdAt;
 });
 
-BusinessSchema.virtual('dateModified').get(function(this: BusinessDocument) {
+BusinessSchema.virtual('dateModified').get(function (this: BusinessDocument) {
   return this.updatedAt;
 });
 
@@ -101,7 +102,7 @@ BusinessSchema.set('toJSON', {
     // '@type' is already handled by a direct Prop default: 'LocalBusiness'
     // but ensure it's present in the final 'ret' object
     if (!ret['@type']) {
-        ret['@type'] = doc['@type'] || 'LocalBusiness';
+      ret['@type'] = doc['@type'] || 'LocalBusiness';
     }
 
     // Ensure the main document's @id is correctly set
@@ -116,13 +117,18 @@ BusinessSchema.set('toJSON', {
       const founderDoc = doc.founder; // Original populated document or ObjectId
       let founderIdValue = '';
 
-      if (founderDoc && typeof founderDoc === 'object') { // Populated
-        if (typeof founderDoc['@id'] === 'string' && founderDoc['@id'].length > 0) {
+      if (founderDoc && typeof founderDoc === 'object') {
+        // Populated
+        if (
+          typeof founderDoc['@id'] === 'string' &&
+          founderDoc['@id'].length > 0
+        ) {
           founderIdValue = founderDoc['@id'];
         } else if (founderDoc._id) {
           founderIdValue = founderDoc._id.toString();
         }
-      } else if (founderDoc) { // ObjectId or string ID
+      } else if (founderDoc) {
+        // ObjectId or string ID
         founderIdValue = founderDoc.toString();
       }
 
@@ -133,12 +139,13 @@ BusinessSchema.set('toJSON', {
         };
       } else if (typeof ret.founder === 'object' && ret.founder['@id']) {
         // If Person's toJSON already transformed it and put an '@id'
-         ret.founder = {
+        ret.founder = {
           '@type': 'Person',
           '@id': ret.founder['@id'],
         };
-      } else if (ret.founder) { // Fallback for non-object ID case
-         ret.founder = {
+      } else if (ret.founder) {
+        // Fallback for non-object ID case
+        ret.founder = {
           '@type': 'Person',
           '@id': ret.founder.toString(),
         };
@@ -146,8 +153,12 @@ BusinessSchema.set('toJSON', {
     }
 
     // Ensure PostalAddress gets its @type if it's not automatically included by sub-schema toJSON
-    if (ret.address && typeof ret.address === 'object' && !ret.address['@type']) {
-        ret.address['@type'] = 'PostalAddress';
+    if (
+      ret.address &&
+      typeof ret.address === 'object' &&
+      !ret.address['@type']
+    ) {
+      ret.address['@type'] = 'PostalAddress';
     }
 
     // Ensure dateCreated and dateModified are using the virtuals
@@ -163,18 +174,21 @@ BusinessSchema.set('toObject', { virtuals: true, getters: true });
 
 // Indexes
 BusinessSchema.index({ isDeleted: 1, name: 1 });
-BusinessSchema.index({ isDeleted: 1, '@id': 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+BusinessSchema.index(
+  { isDeleted: 1, '@id': 1 },
+  { unique: true, partialFilterExpression: { isDeleted: false } },
+);
 // Consider geospatial index if address.geolocation is added later
 // e.g., BusinessSchema.index({ 'address.location': '2dsphere' });
 
 // Soft delete methods
-BusinessSchema.methods.softDelete = function() {
+BusinessSchema.methods.softDelete = function () {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
-BusinessSchema.methods.restore = function() {
+BusinessSchema.methods.restore = function () {
   this.deletedAt = null;
   this.isDeleted = false;
   return this.save();

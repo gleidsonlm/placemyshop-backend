@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RoleSeedingService } from './role-seeding.service';
-import { Role, RoleDocument, RoleName, getDefaultPermissionsForRole } from './schemas/role.schema';
+import {
+  Role,
+  RoleDocument,
+  RoleName,
+  getDefaultPermissionsForRole,
+} from './schemas/role.schema';
 import { Logger } from '@nestjs/common';
 
 // Mock the Logger
@@ -20,9 +25,8 @@ const MockRoleModelCtor = jest.fn().mockImplementation(mockRoleInstance);
 
 // Static methods like findOne, find, etc., are attached to the constructor itself
 (MockRoleModelCtor as any).findOne = jest.fn().mockReturnValue({
-  exec: jest.fn().mockResolvedValue(null)
+  exec: jest.fn().mockResolvedValue(null),
 });
-
 
 describe('RoleSeedingService', () => {
   let service: RoleSeedingService;
@@ -34,12 +38,16 @@ describe('RoleSeedingService', () => {
 
     // Reset/re-configure mocks for each test to ensure isolation
     // Static findOne method
-    ((MockRoleModelCtor as any).findOne as jest.Mock).mockClear().mockReturnValue({
-      exec: jest.fn().mockResolvedValue(null)
-    });
+    ((MockRoleModelCtor as any).findOne as jest.Mock)
+      .mockClear()
+      .mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
 
     // Instance save method (via mockSave shared by all instances)
-    mockSave.mockClear().mockResolvedValue({ /* some resolved value */ });
+    mockSave.mockClear().mockResolvedValue({
+      /* some resolved value */
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -69,20 +77,49 @@ describe('RoleSeedingService', () => {
 
       // Check that findOne was called for each role
       expect((MockRoleModelCtor as any).findOne).toHaveBeenCalledTimes(3);
-      expect((MockRoleModelCtor as any).findOne).toHaveBeenCalledWith({ roleName: RoleName.ADMIN, isDeleted: false });
-      expect((MockRoleModelCtor as any).findOne).toHaveBeenCalledWith({ roleName: RoleName.MANAGER, isDeleted: false });
-      expect((MockRoleModelCtor as any).findOne).toHaveBeenCalledWith({ roleName: RoleName.ASSISTANT, isDeleted: false });
+      expect((MockRoleModelCtor as any).findOne).toHaveBeenCalledWith({
+        roleName: RoleName.ADMIN,
+        isDeleted: false,
+      });
+      expect((MockRoleModelCtor as any).findOne).toHaveBeenCalledWith({
+        roleName: RoleName.MANAGER,
+        isDeleted: false,
+      });
+      expect((MockRoleModelCtor as any).findOne).toHaveBeenCalledWith({
+        roleName: RoleName.ASSISTANT,
+        isDeleted: false,
+      });
 
       // Check that the constructor was called for each role
       expect(MockRoleModelCtor).toHaveBeenCalledTimes(3);
 
       const adminPermissions = getDefaultPermissionsForRole(RoleName.ADMIN);
       const managerPermissions = getDefaultPermissionsForRole(RoleName.MANAGER);
-      const assistantPermissions = getDefaultPermissionsForRole(RoleName.ASSISTANT);
+      const assistantPermissions = getDefaultPermissionsForRole(
+        RoleName.ASSISTANT,
+      );
 
-      expect(MockRoleModelCtor).toHaveBeenCalledWith(expect.objectContaining({ roleName: RoleName.ADMIN, permissions: adminPermissions, '@id': expect.any(String) }));
-      expect(MockRoleModelCtor).toHaveBeenCalledWith(expect.objectContaining({ roleName: RoleName.MANAGER, permissions: managerPermissions, '@id': expect.any(String) }));
-      expect(MockRoleModelCtor).toHaveBeenCalledWith(expect.objectContaining({ roleName: RoleName.ASSISTANT, permissions: assistantPermissions, '@id': expect.any(String) }));
+      expect(MockRoleModelCtor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roleName: RoleName.ADMIN,
+          permissions: adminPermissions,
+          '@id': expect.any(String),
+        }),
+      );
+      expect(MockRoleModelCtor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roleName: RoleName.MANAGER,
+          permissions: managerPermissions,
+          '@id': expect.any(String),
+        }),
+      );
+      expect(MockRoleModelCtor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roleName: RoleName.ASSISTANT,
+          permissions: assistantPermissions,
+          '@id': expect.any(String),
+        }),
+      );
 
       // Check that save was called 3 times (once for each new role instance)
       expect(mockSave).toHaveBeenCalledTimes(3);
@@ -90,12 +127,25 @@ describe('RoleSeedingService', () => {
 
     it('should not create any roles if all default roles already exist', async () => {
       // Override findOne to return existing roles
-      ((MockRoleModelCtor as any).findOne as jest.Mock).mockImplementation((query: any) => {
-        if (query.roleName === RoleName.ADMIN) return { exec: jest.fn().mockResolvedValue({ roleName: RoleName.ADMIN }) };
-        if (query.roleName === RoleName.MANAGER) return { exec: jest.fn().mockResolvedValue({ roleName: RoleName.MANAGER }) };
-        if (query.roleName === RoleName.ASSISTANT) return { exec: jest.fn().mockResolvedValue({ roleName: RoleName.ASSISTANT }) };
-        return { exec: jest.fn().mockResolvedValue(null) };
-      });
+      ((MockRoleModelCtor as any).findOne as jest.Mock).mockImplementation(
+        (query: any) => {
+          if (query.roleName === RoleName.ADMIN)
+            return {
+              exec: jest.fn().mockResolvedValue({ roleName: RoleName.ADMIN }),
+            };
+          if (query.roleName === RoleName.MANAGER)
+            return {
+              exec: jest.fn().mockResolvedValue({ roleName: RoleName.MANAGER }),
+            };
+          if (query.roleName === RoleName.ASSISTANT)
+            return {
+              exec: jest
+                .fn()
+                .mockResolvedValue({ roleName: RoleName.ASSISTANT }),
+            };
+          return { exec: jest.fn().mockResolvedValue(null) };
+        },
+      );
 
       await service.seedDefaultRoles();
 
@@ -105,12 +155,27 @@ describe('RoleSeedingService', () => {
     });
 
     it('should create missing roles if some default roles already exist', async () => {
-      ((MockRoleModelCtor as any).findOne as jest.Mock).mockImplementation((query: any) => {
-        if (query.roleName === RoleName.ADMIN) return { exec: jest.fn().mockResolvedValue({ roleName: RoleName.ADMIN, isDeleted: false }) }; // Admin exists
-        if (query.roleName === RoleName.MANAGER) return { exec: jest.fn().mockResolvedValue(null) }; // Manager does NOT exist
-        if (query.roleName === RoleName.ASSISTANT) return { exec: jest.fn().mockResolvedValue({ roleName: RoleName.ASSISTANT, isDeleted: false }) }; // Assistant exists
-        return { exec: jest.fn().mockResolvedValue(null) };
-      });
+      ((MockRoleModelCtor as any).findOne as jest.Mock).mockImplementation(
+        (query: any) => {
+          if (query.roleName === RoleName.ADMIN)
+            return {
+              exec: jest.fn().mockResolvedValue({
+                roleName: RoleName.ADMIN,
+                isDeleted: false,
+              }),
+            }; // Admin exists
+          if (query.roleName === RoleName.MANAGER)
+            return { exec: jest.fn().mockResolvedValue(null) }; // Manager does NOT exist
+          if (query.roleName === RoleName.ASSISTANT)
+            return {
+              exec: jest.fn().mockResolvedValue({
+                roleName: RoleName.ASSISTANT,
+                isDeleted: false,
+              }),
+            }; // Assistant exists
+          return { exec: jest.fn().mockResolvedValue(null) };
+        },
+      );
 
       await service.seedDefaultRoles();
 
@@ -118,7 +183,13 @@ describe('RoleSeedingService', () => {
       expect(MockRoleModelCtor).toHaveBeenCalledTimes(1); // Only for Manager
 
       const managerPermissions = getDefaultPermissionsForRole(RoleName.MANAGER);
-      expect(MockRoleModelCtor).toHaveBeenCalledWith(expect.objectContaining({ roleName: RoleName.MANAGER, permissions: managerPermissions, '@id': expect.any(String) }));
+      expect(MockRoleModelCtor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roleName: RoleName.MANAGER,
+          permissions: managerPermissions,
+          '@id': expect.any(String),
+        }),
+      );
 
       expect(mockSave).toHaveBeenCalledTimes(1); // Only manager's instance should save
     });
@@ -127,7 +198,9 @@ describe('RoleSeedingService', () => {
       const error = new Error('DB save failed');
 
       // All roles initially appear not to exist
-      ((MockRoleModelCtor as any).findOne as jest.Mock).mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+      ((MockRoleModelCtor as any).findOne as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
 
       // Mock save to fail for Manager, succeed for others
       mockSave

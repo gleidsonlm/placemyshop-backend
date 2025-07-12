@@ -29,7 +29,10 @@ describe('CreateBusinessDto', () => {
     const transformedDto = plainToClass(CreateBusinessDto, dto);
     const errors = await validate(transformedDto);
     if (errors.length > 0) {
-      console.log('Validation errors for "correct DTO with all fields":', JSON.stringify(errors, null, 2));
+      console.log(
+        'Validation errors for "correct DTO with all fields":',
+        JSON.stringify(errors, null, 2),
+      );
     }
     expect(errors.length).toBe(0);
   });
@@ -59,7 +62,9 @@ describe('CreateBusinessDto', () => {
       dto.founderId = validFounderId;
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].constraints?.isUuid).toContain('@id must be a valid UUID v4');
+      expect(errors[0].constraints?.isUuid).toContain(
+        '@id must be a valid UUID v4',
+      );
     });
   });
 
@@ -69,7 +74,9 @@ describe('CreateBusinessDto', () => {
       dto.founderId = validFounderId;
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.find(e => e.property === 'name')?.constraints?.isNotEmpty).toBeDefined();
+      expect(
+        errors.find((e) => e.property === 'name')?.constraints?.isNotEmpty,
+      ).toBeDefined();
     });
   });
 
@@ -79,7 +86,9 @@ describe('CreateBusinessDto', () => {
       dto.name = 'No Founder Inc.';
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.find(e => e.property === 'founderId')?.constraints?.isNotEmpty).toBeDefined();
+      expect(
+        errors.find((e) => e.property === 'founderId')?.constraints?.isNotEmpty,
+      ).toBeDefined();
     });
   });
 
@@ -91,7 +100,9 @@ describe('CreateBusinessDto', () => {
       dto.email = 'not-an-email';
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.find(e => e.property === 'email')?.constraints?.isEmail).toBeDefined();
+      expect(
+        errors.find((e) => e.property === 'email')?.constraints?.isEmail,
+      ).toBeDefined();
     });
   });
 
@@ -103,7 +114,9 @@ describe('CreateBusinessDto', () => {
       dto.url = 'not-a-url';
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.find(e => e.property === 'url')?.constraints?.isUrl).toBeDefined();
+      expect(
+        errors.find((e) => e.property === 'url')?.constraints?.isUrl,
+      ).toBeDefined();
     });
   });
 
@@ -115,15 +128,20 @@ describe('CreateBusinessDto', () => {
       dto.sameAs = ['http://valid.com', 'not-a-url'];
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      const sameAsError = errors.find(e => e.property === 'sameAs');
+      const sameAsError = errors.find((e) => e.property === 'sameAs');
       if (sameAsError) {
-        console.log('sameAsError structure:', JSON.stringify(sameAsError, null, 2));
+        console.log(
+          'sameAsError structure:',
+          JSON.stringify(sameAsError, null, 2),
+        );
       }
       expect(sameAsError).toBeDefined();
       // This checks the nested error for the invalid URL in the array
       // For arrays of primitives, the constraint violation is usually directly on the property
       // if 'each: true' is used and one of them fails. The message indicates this.
-      expect(sameAsError?.constraints?.isUrl).toContain('each value in sameAs must be a URL address');
+      expect(sameAsError?.constraints?.isUrl).toContain(
+        'each value in sameAs must be a URL address',
+      );
     });
   });
 
@@ -139,48 +157,54 @@ describe('CreateBusinessDto', () => {
       const transformedDto = plainToClass(CreateBusinessDto, dto);
       const errors = await validate(transformedDto);
       if (errors.length > 0) {
-        console.log('Validation errors for "nested PostalAddressDto correctly":', JSON.stringify(errors, null, 2));
+        console.log(
+          'Validation errors for "nested PostalAddressDto correctly":',
+          JSON.stringify(errors, null, 2),
+        );
       }
       expect(errors.length).toBe(0);
     });
 
     it('should allow PostalAddressDto with all fields empty (all optional)', async () => {
-        const dto = new CreateBusinessDto();
-        dto.name = 'Empty Address Test Biz';
-        dto.founderId = validFounderId;
-        dto.address = {}; // All fields in PostalAddressDto are optional
-        const transformedDto = plainToClass(CreateBusinessDto, dto);
-        const errors = await validate(transformedDto);
-        if (errors.length > 0) {
-          console.log('Validation errors for "PostalAddressDto with all fields empty":', JSON.stringify(errors, null, 2));
-        }
-        expect(errors.length).toBe(0);
-      });
+      const dto = new CreateBusinessDto();
+      dto.name = 'Empty Address Test Biz';
+      dto.founderId = validFounderId;
+      dto.address = {}; // All fields in PostalAddressDto are optional
+      const transformedDto = plainToClass(CreateBusinessDto, dto);
+      const errors = await validate(transformedDto);
+      if (errors.length > 0) {
+        console.log(
+          'Validation errors for "PostalAddressDto with all fields empty":',
+          JSON.stringify(errors, null, 2),
+        );
+      }
+      expect(errors.length).toBe(0);
+    });
   });
 });
 
 describe('PostalAddressDto', () => {
-    it('should validate with all fields present', async () => {
-        const dto = new PostalAddressDto();
-        dto.streetAddress = '123 Main St';
-        dto.addressLocality = 'Anytown';
-        dto.addressRegion = 'CA';
-        dto.postalCode = '90210';
-        dto.addressCountry = 'US';
-        const errors = await validate(dto);
-        expect(errors.length).toBe(0);
-    });
+  it('should validate with all fields present', async () => {
+    const dto = new PostalAddressDto();
+    dto.streetAddress = '123 Main St';
+    dto.addressLocality = 'Anytown';
+    dto.addressRegion = 'CA';
+    dto.postalCode = '90210';
+    dto.addressCountry = 'US';
+    const errors = await validate(dto);
+    expect(errors.length).toBe(0);
+  });
 
-    it('should validate with some fields present', async () => {
-        const dto = new PostalAddressDto();
-        dto.streetAddress = '456 Oak Ave';
-        const errors = await validate(dto);
-        expect(errors.length).toBe(0);
-    });
+  it('should validate with some fields present', async () => {
+    const dto = new PostalAddressDto();
+    dto.streetAddress = '456 Oak Ave';
+    const errors = await validate(dto);
+    expect(errors.length).toBe(0);
+  });
 
-    it('should validate with no fields present (all optional)', async () => {
-        const dto = new PostalAddressDto();
-        const errors = await validate(dto);
-        expect(errors.length).toBe(0);
-    });
+  it('should validate with no fields present (all optional)', async () => {
+    const dto = new PostalAddressDto();
+    const errors = await validate(dto);
+    expect(errors.length).toBe(0);
+  });
 });

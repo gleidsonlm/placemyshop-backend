@@ -41,33 +41,43 @@ describe('AppModule', () => {
     testingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-    .overrideProvider(ConfigService)
-    .useValue(mockConfigService)
-    .useMocker((token) => {
-      const roleModelToken = getModelToken(Role.name);
-      const personModelToken = getModelToken(Person.name);
-      const businessModelToken = getModelToken(Business.name);
+      .overrideProvider(ConfigService)
+      .useValue(mockConfigService)
+      .useMocker((token) => {
+        const roleModelToken = getModelToken(Role.name);
+        const personModelToken = getModelToken(Person.name);
+        const businessModelToken = getModelToken(Business.name);
 
-      if (token === roleModelToken || token === personModelToken || token === businessModelToken) {
-        // Create a mock Mongoose model
-        const mockModel: any = jest.fn().mockImplementation((dto: any) => ({
-          ...dto,
-          save: jest.fn().mockResolvedValue(dto),
-        }));
-        
-        // Add static methods that Mongoose models have
-        mockModel.findOne = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
-        mockModel.findById = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
-        mockModel.find = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
-        mockModel.create = jest.fn().mockResolvedValue({});
-        
-        return mockModel;
-      }
+        if (
+          token === roleModelToken ||
+          token === personModelToken ||
+          token === businessModelToken
+        ) {
+          // Create a mock Mongoose model
+          const mockModel: any = jest.fn().mockImplementation((dto: any) => ({
+            ...dto,
+            save: jest.fn().mockResolvedValue(dto),
+          }));
 
-      // For any other dependencies, return a basic mock
-      return {};
-    })
-    .compile();
+          // Add static methods that Mongoose models have
+          mockModel.findOne = jest
+            .fn()
+            .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+          mockModel.findById = jest
+            .fn()
+            .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+          mockModel.find = jest
+            .fn()
+            .mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
+          mockModel.create = jest.fn().mockResolvedValue({});
+
+          return mockModel;
+        }
+
+        // For any other dependencies, return a basic mock
+        return {};
+      })
+      .compile();
   });
 
   // afterEach(async () => {

@@ -6,11 +6,13 @@ import { Business, BusinessSchema } from './schemas/business.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Business.name, schema: BusinessSchema }]),
+    MongooseModule.forFeature([
+      { name: Business.name, schema: BusinessSchema },
+    ]),
     // UsersModule, // If population or direct interaction is needed from BusinessService
   ],
   controllers: [], // To be added
-  providers: [],   // To be added
-  exports: [],     // To be added
+  providers: [], // To be added
+  exports: [], // To be added
 })
 export class BusinessesModule {}

@@ -1,7 +1,12 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Role, RoleDocument, RoleName, getDefaultPermissionsForRole } from './schemas/role.schema';
+import {
+  Role,
+  RoleDocument,
+  RoleName,
+  getDefaultPermissionsForRole,
+} from './schemas/role.schema';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -23,9 +28,13 @@ export class RoleSeedingService {
 
     for (const roleName of defaultRolesToSeed) {
       try {
-        const existingRole = await this.roleModel.findOne({ roleName, isDeleted: false }).exec();
+        const existingRole = await this.roleModel
+          .findOne({ roleName, isDeleted: false })
+          .exec();
         if (existingRole) {
-          this.logger.log(`Role "${roleName}" already exists. Skipping creation.`);
+          this.logger.log(
+            `Role "${roleName}" already exists. Skipping creation.`,
+          );
         } else {
           const permissions = getDefaultPermissionsForRole(roleName);
           const newRole = new this.roleModel({
@@ -33,13 +42,18 @@ export class RoleSeedingService {
             roleName,
             permissions,
             isDeleted: false, // Explicitly set, though default
-            deletedAt: null,  // Explicitly set, though default
+            deletedAt: null, // Explicitly set, though default
           });
           await newRole.save();
-          this.logger.log(`Role "${roleName}" created successfully with @id: ${newRole['@id']}.`);
+          this.logger.log(
+            `Role "${roleName}" created successfully with @id: ${newRole['@id']}.`,
+          );
         }
       } catch (error) {
-        this.logger.error(`Error seeding role "${roleName}": ${error.message}`, error.stack);
+        this.logger.error(
+          `Error seeding role "${roleName}": ${error.message}`,
+          error.stack,
+        );
       }
     }
     this.logger.log('Role seeding process finished.');

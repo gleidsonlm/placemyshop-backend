@@ -11,7 +11,7 @@ jest.mock('@nestjs/core', () => ({
 }));
 
 describe('main.ts - bootstrap function', () => {
-  let mockApp: { listen: jest.Mock;[key: string]: any };
+  let mockApp: { listen: jest.Mock; [key: string]: any };
 
   beforeEach(() => {
     // Reset process.env.PORT
