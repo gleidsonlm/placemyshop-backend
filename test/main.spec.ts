@@ -11,7 +11,11 @@ jest.mock('@nestjs/core', () => ({
 }));
 
 describe('main.ts - bootstrap function', () => {
-  let mockApp: { listen: jest.Mock;[key: string]: any };
+  let mockApp: {
+    listen: jest.Mock;
+    getHttpAdapter: jest.Mock;
+    [key: string]: any;
+  };
 
   beforeEach(() => {
     // Reset process.env.PORT
@@ -20,6 +24,7 @@ describe('main.ts - bootstrap function', () => {
     // Mock the Nest application instance and its methods
     mockApp = {
       listen: jest.fn().mockResolvedValue(undefined),
+      getHttpAdapter: jest.fn().mockReturnValue({}),
       // Mock other methods like useGlobalPipes, enableCors, enableShutdownHooks if they are used in main.ts
       // For example: enableShutdownHooks: jest.fn(),
     };
@@ -35,6 +40,7 @@ describe('main.ts - bootstrap function', () => {
 
   it('should create Nest application with AppModule', async () => {
     await bootstrap();
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(NestFactory.create).toHaveBeenCalledWith(AppModule);
   });
 
@@ -48,18 +54,4 @@ describe('main.ts - bootstrap function', () => {
     await bootstrap();
     expect(mockApp.listen).toHaveBeenCalledWith('3001');
   });
-
-  // If main.ts were to include app.enableShutdownHooks():
-  // it('should call enableShutdownHooks if present in bootstrap', async () => {
-  //   // Add the mock method to your mockApp for this test
-  //   mockApp.enableShutdownHooks = jest.fn();
-  //   (NestFactory.create as jest.Mock).mockResolvedValue(mockApp); // Ensure create returns the app with this method
-  //
-  //   await bootstrap();
-  //
-  //   // Check if enableShutdownHooks was called on the app instance
-  //   // This requires that your bootstrap function in main.ts actually calls app.enableShutdownHooks()
-  //   // For the current main.ts, this test would fail or be irrelevant.
-  //   // expect(mockApp.enableShutdownHooks).toHaveBeenCalled();
-  // });
 });
