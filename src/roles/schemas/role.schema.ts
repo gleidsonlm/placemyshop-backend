@@ -68,41 +68,39 @@ RoleSchema.virtual('dateModified').get(function(this: RoleDocument) {
 
 RoleSchema.set('toJSON', {
   virtuals: true,
-  transform: function(doc: any, ret: any) {
+  transform: (doc: RoleDocument, ret: Partial<RoleDocument>) => {
     ret['@context'] = 'https://schema.org'; // Or appropriate context if not schema.org
     ret['@type'] = 'Role';
 
-    // Ensure the main document's @id is correctly set
-    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
-      ret['@id'] = doc['@id'];
-    } else if (doc._id) { // Mongoose Document _id
-      ret['@id'] = doc._id.toString();
-    }
+    // Ensure @id is set, preferring the schema's @id over the mongo _id
+    ret['@id'] = doc['@id'] || doc._id.toString();
 
-    // Ensure dateCreated and dateModified are using the virtuals
+    // Copy virtuals to the final object
     ret.dateCreated = doc.dateCreated;
     ret.dateModified = doc.dateModified;
 
-    // delete ret._id;
-    // delete ret.__v;
+    // Remove mongoose specific fields
+    delete ret._id;
+    delete ret.__v;
+
     return ret;
-  }
+  },
 });
+
 RoleSchema.set('toObject', { virtuals: true });
 
 // Indexes
 RoleSchema.index({ isDeleted: 1, roleName: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
 RoleSchema.index({ isDeleted: 1, '@id': 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
 
-
-// Soft delete methods
-RoleSchema.methods.softDelete = function() {
+// Soft delete and restore methods using arrow functions
+RoleSchema.methods.softDelete = function (this: RoleDocument): Promise<RoleDocument> {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
-RoleSchema.methods.restore = function() {
+RoleSchema.methods.restore = function (this: RoleDocument): Promise<RoleDocument> {
   this.deletedAt = null;
   this.isDeleted = false;
   return this.save();
