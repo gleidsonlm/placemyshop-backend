@@ -1,15 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { BusinessesService } from './businesses.service';
 import { Business } from './schemas/business.schema';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
 describe('BusinessesService', () => {
   let service: BusinessesService;
-  let model: Model<Business>;
 
   const mockBusiness = {
     '@id': 'business-uuid-123',
@@ -45,7 +43,6 @@ describe('BusinessesService', () => {
     }).compile();
 
     service = module.get<BusinessesService>(BusinessesService);
-    model = module.get<Model<Business>>(getModelToken(Business.name));
   });
 
   it('should be defined', () => {
@@ -71,7 +68,9 @@ describe('BusinessesService', () => {
       const result = await service.create(createBusinessDto);
 
       expect(mockBusinessModel.create).toHaveBeenCalled();
-      expect(mockBusinessModel.findById).toHaveBeenCalledWith(createdBusiness._id);
+      expect(mockBusinessModel.findById).toHaveBeenCalledWith(
+        createdBusiness._id,
+      );
       expect(result).toEqual(mockBusiness);
     });
   });
@@ -90,7 +89,9 @@ describe('BusinessesService', () => {
 
       const result = await service.findAll(1, 10);
 
-      expect(mockBusinessModel.find).toHaveBeenCalledWith({ isDeleted: { $ne: true } });
+      expect(mockBusinessModel.find).toHaveBeenCalledWith({
+        isDeleted: { $ne: true },
+      });
       expect(mockQuery.populate).toHaveBeenCalledWith('founder');
       expect(mockQuery.skip).toHaveBeenCalledWith(0);
       expect(mockQuery.limit).toHaveBeenCalledWith(10);
@@ -109,7 +110,9 @@ describe('BusinessesService', () => {
 
       const result = await service.findOne('business-uuid-123');
 
-      expect(mockBusinessModel.findById).toHaveBeenCalledWith('business-uuid-123');
+      expect(mockBusinessModel.findById).toHaveBeenCalledWith(
+        'business-uuid-123',
+      );
       expect(mockQuery.populate).toHaveBeenCalledWith('founder');
       expect(result).toEqual(mockBusiness);
     });
@@ -122,7 +125,9 @@ describe('BusinessesService', () => {
 
       mockBusinessModel.findById.mockReturnValue(mockQuery);
 
-      await expect(service.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -138,9 +143,9 @@ describe('BusinessesService', () => {
 
       const result = await service.findByFounder('person-uuid-456');
 
-      expect(mockBusinessModel.find).toHaveBeenCalledWith({ 
-        founder: 'person-uuid-456', 
-        isDeleted: { $ne: true } 
+      expect(mockBusinessModel.find).toHaveBeenCalledWith({
+        founder: 'person-uuid-456',
+        isDeleted: { $ne: true },
       });
       expect(result).toEqual(businesses);
     });
@@ -161,12 +166,15 @@ describe('BusinessesService', () => {
 
       mockBusinessModel.findByIdAndUpdate.mockReturnValue(mockQuery);
 
-      const result = await service.update('business-uuid-123', updateBusinessDto);
+      const result = await service.update(
+        'business-uuid-123',
+        updateBusinessDto,
+      );
 
       expect(mockBusinessModel.findByIdAndUpdate).toHaveBeenCalledWith(
         'business-uuid-123',
         updateBusinessDto,
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
       expect(result).toEqual(updatedBusiness);
     });
@@ -183,7 +191,9 @@ describe('BusinessesService', () => {
 
       mockBusinessModel.findByIdAndUpdate.mockReturnValue(mockQuery);
 
-      await expect(service.update('nonexistent-id', updateBusinessDto)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent-id', updateBusinessDto),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -194,7 +204,9 @@ describe('BusinessesService', () => {
 
       const result = await service.remove('business-uuid-123');
 
-      expect(mockBusinessModel.findById).toHaveBeenCalledWith('business-uuid-123');
+      expect(mockBusinessModel.findById).toHaveBeenCalledWith(
+        'business-uuid-123',
+      );
       expect(mockBusiness.softDelete).toHaveBeenCalled();
       expect(result).toEqual(mockBusiness);
     });
@@ -202,7 +214,9 @@ describe('BusinessesService', () => {
     it('should throw NotFoundException if business not found', async () => {
       mockBusinessModel.findById.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

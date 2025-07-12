@@ -8,12 +8,14 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('RolesController', () => {
   let controller: RolesController;
-  let service: RolesService;
 
   const mockRole = {
     '@id': 'role-uuid-123',
     roleName: RoleName.MANAGER,
-    permissions: [Permission.MANAGE_CUSTOMERS_MANAGER, Permission.ACCESS_CUSTOMER_CHAT_FULL_MANAGER],
+    permissions: [
+      Permission.MANAGE_CUSTOMERS_MANAGER,
+      Permission.ACCESS_CUSTOMER_CHAT_FULL_MANAGER,
+    ],
     dateCreated: new Date(),
     dateModified: new Date(),
   };
@@ -39,7 +41,6 @@ describe('RolesController', () => {
     }).compile();
 
     controller = module.get<RolesController>(RolesController);
-    service = module.get<RolesService>(RolesService);
   });
 
   it('should be defined', () => {
@@ -57,7 +58,7 @@ describe('RolesController', () => {
 
       const result = await controller.create(createRoleDto);
 
-      expect(service.create).toHaveBeenCalledWith(createRoleDto);
+      expect(mockRolesService.create).toHaveBeenCalledWith(createRoleDto);
       expect(result).toEqual(mockRole);
     });
 
@@ -67,9 +68,13 @@ describe('RolesController', () => {
         permissions: [Permission.MANAGE_CUSTOMERS_MANAGER],
       };
 
-      mockRolesService.create.mockRejectedValue(new ConflictException('Role name already exists'));
+      mockRolesService.create.mockRejectedValue(
+        new ConflictException('Role name already exists'),
+      );
 
-      await expect(controller.create(createRoleDto)).rejects.toThrow(ConflictException);
+      await expect(controller.create(createRoleDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -80,7 +85,7 @@ describe('RolesController', () => {
 
       const result = await controller.findAll();
 
-      expect(service.findAll).toHaveBeenCalledWith(1, 10);
+      expect(mockRolesService.findAll).toHaveBeenCalledWith(1, 10);
       expect(result).toEqual(roles);
     });
 
@@ -90,7 +95,7 @@ describe('RolesController', () => {
 
       const result = await controller.findAll(2, 20);
 
-      expect(service.findAll).toHaveBeenCalledWith(2, 20);
+      expect(mockRolesService.findAll).toHaveBeenCalledWith(2, 20);
       expect(result).toEqual(roles);
     });
   });
@@ -101,14 +106,18 @@ describe('RolesController', () => {
 
       const result = await controller.findOne('role-uuid-123');
 
-      expect(service.findOne).toHaveBeenCalledWith('role-uuid-123');
+      expect(mockRolesService.findOne).toHaveBeenCalledWith('role-uuid-123');
       expect(result).toEqual(mockRole);
     });
 
     it('should throw NotFoundException if role not found', async () => {
-      mockRolesService.findOne.mockRejectedValue(new NotFoundException('Role not found'));
+      mockRolesService.findOne.mockRejectedValue(
+        new NotFoundException('Role not found'),
+      );
 
-      await expect(controller.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(controller.findOne('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -123,7 +132,10 @@ describe('RolesController', () => {
 
       const result = await controller.update('role-uuid-123', updateRoleDto);
 
-      expect(service.update).toHaveBeenCalledWith('role-uuid-123', updateRoleDto);
+      expect(mockRolesService.update).toHaveBeenCalledWith(
+        'role-uuid-123',
+        updateRoleDto,
+      );
       expect(result).toEqual(updatedRole);
     });
   });
@@ -135,7 +147,7 @@ describe('RolesController', () => {
 
       const result = await controller.remove('role-uuid-123');
 
-      expect(service.remove).toHaveBeenCalledWith('role-uuid-123');
+      expect(mockRolesService.remove).toHaveBeenCalledWith('role-uuid-123');
       expect(result).toEqual(deletedRole);
     });
   });
@@ -146,7 +158,7 @@ describe('RolesController', () => {
 
       const result = await controller.restore('role-uuid-123');
 
-      expect(service.restore).toHaveBeenCalledWith('role-uuid-123');
+      expect(mockRolesService.restore).toHaveBeenCalledWith('role-uuid-123');
       expect(result).toEqual(mockRole);
     });
   });

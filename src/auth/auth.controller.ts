@@ -22,6 +22,19 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshTokenDto, LoginDto } from './dto/auth.dto';
 
+interface AuthenticatedRequest extends Request {
+  user: {
+    '@id': string;
+    email: string;
+    givenName: string;
+    familyName: string;
+    role: {
+      '@id': string;
+      roleName: string;
+    };
+  };
+}
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -30,7 +43,10 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'User login', description: 'Authenticate user with email and password' })
+  @ApiOperation({
+    summary: 'User login',
+    description: 'Authenticate user with email and password',
+  })
   @ApiBody({
     type: LoginDto,
     description: 'User credentials',
@@ -68,7 +84,10 @@ export class AuthController {
             role: {
               type: 'object',
               properties: {
-                '@id': { type: 'string', description: 'Role unique identifier' },
+                '@id': {
+                  type: 'string',
+                  description: 'Role unique identifier',
+                },
                 roleName: { type: 'string', description: 'Role name' },
               },
             },
@@ -78,13 +97,16 @@ export class AuthController {
     },
   })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
-  async login(@Request() req: any) {
+  async login(@Request() req: AuthenticatedRequest) {
     return this.authService.login(req.user);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh access token', description: 'Get a new access token using refresh token' })
+  @ApiOperation({
+    summary: 'Refresh access token',
+    description: 'Get a new access token using refresh token',
+  })
   @ApiBody({
     type: RefreshTokenDto,
     description: 'Refresh token',
@@ -118,7 +140,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get user profile', description: 'Get current authenticated user profile' })
+  @ApiOperation({
+    summary: 'Get user profile',
+    description: 'Get current authenticated user profile',
+  })
   @ApiResponse({
     status: 200,
     description: 'User profile data',
@@ -145,13 +170,16 @@ export class AuthController {
     },
   })
   @ApiUnauthorizedResponse({ description: 'Authentication required' })
-  getProfile(@Request() req: any) {
+  getProfile(@Request() req: AuthenticatedRequest) {
     return req.user;
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'User logout', description: 'Logout user (client should discard tokens)' })
+  @ApiOperation({
+    summary: 'User logout',
+    description: 'Logout user (client should discard tokens)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Successful logout',

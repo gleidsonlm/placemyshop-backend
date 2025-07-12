@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role, RoleDocument } from './schemas/role.schema';
@@ -17,7 +22,9 @@ export class RolesService {
     this.logger.log(`Creating new role: ${createRoleDto.roleName}`);
 
     // Check if role name already exists
-    const existingRole = await this.roleModel.findOne({ roleName: createRoleDto.roleName });
+    const existingRole = await this.roleModel.findOne({
+      roleName: createRoleDto.roleName,
+    });
     if (existingRole) {
       throw new ConflictException('Role name already exists');
     }
@@ -60,14 +67,17 @@ export class RolesService {
       .exec();
   }
 
-  async update(id: string, updateRoleDto: UpdateRoleDto): Promise<RoleDocument> {
+  async update(
+    id: string,
+    updateRoleDto: UpdateRoleDto,
+  ): Promise<RoleDocument> {
     this.logger.log(`Updating role with id: ${id}`);
 
     // Check if role name already exists (if roleName is being updated)
     if (updateRoleDto.roleName) {
-      const existingRole = await this.roleModel.findOne({ 
-        roleName: updateRoleDto.roleName, 
-        _id: { $ne: id }
+      const existingRole = await this.roleModel.findOne({
+        roleName: updateRoleDto.roleName,
+        _id: { $ne: id },
       });
       if (existingRole) {
         throw new ConflictException('Role name already exists');

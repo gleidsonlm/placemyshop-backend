@@ -14,16 +14,34 @@ jest.mock('@nestjs/swagger', () => ({
     createDocument: jest.fn().mockReturnValue({}),
     setup: jest.fn(),
   },
-  ApiProperty: jest.fn(() => (target: any, key: string) => {}),
-  ApiPropertyOptional: jest.fn(() => (target: any, key: string) => {}),
-  ApiTags: jest.fn(() => (target: any) => {}),
-  ApiOperation: jest.fn(() => (target: any, key: string, descriptor: PropertyDescriptor) => {}),
-  ApiResponse: jest.fn(() => (target: any, key: string, descriptor: PropertyDescriptor) => {}),
-  ApiParam: jest.fn(() => (target: any, key: string, descriptor: PropertyDescriptor) => {}),
-  ApiQuery: jest.fn(() => (target: any, key: string, descriptor: PropertyDescriptor) => {}),
-  ApiBody: jest.fn(() => (target: any, key: string, descriptor: PropertyDescriptor) => {}),
-  ApiBearerAuth: jest.fn(() => (target: any, key?: string, descriptor?: PropertyDescriptor) => {}),
-  ApiUnauthorizedResponse: jest.fn(() => (target: any, key: string, descriptor: PropertyDescriptor) => {}),
-  ApiNotFoundResponse: jest.fn(() => (target: any, key: string, descriptor: PropertyDescriptor) => {}),
-  ApiConflictResponse: jest.fn(() => (target: any, key: string, descriptor: PropertyDescriptor) => {}),
+  ApiProperty: jest.fn(() => (_target: any, _key: string) => {}),
+  ApiPropertyOptional: jest.fn(() => (_target: any, _key: string) => {}),
+  ApiTags: jest.fn(() => (_target: any) => {}),
+  ApiOperation: jest.fn(
+    () => (_target: any, _key: string, _descriptor: PropertyDescriptor) => {},
+  ),
+  ApiResponse: jest.fn(
+    () => (_target: any, _key: string, _descriptor: PropertyDescriptor) => {},
+  ),
+  ApiParam: jest.fn(
+    () => (_target: any, _key: string, _descriptor: PropertyDescriptor) => {},
+  ),
+  ApiQuery: jest.fn(
+    () => (_target: any, _key: string, _descriptor: PropertyDescriptor) => {},
+  ),
+  ApiBody: jest.fn(
+    () => (_target: any, _key: string, _descriptor: PropertyDescriptor) => {},
+  ),
+  ApiBearerAuth: jest.fn(
+    () => (_target: any, _key?: string, _descriptor?: PropertyDescriptor) => {},
+  ),
+  ApiUnauthorizedResponse: jest.fn(
+    () => (_target: any, _key: string, _descriptor: PropertyDescriptor) => {},
+  ),
+  ApiNotFoundResponse: jest.fn(
+    () => (_target: any, _key: string, _descriptor: PropertyDescriptor) => {},
+  ),
+  ApiConflictResponse: jest.fn(
+    () => (_target: any, _key: string, _descriptor: PropertyDescriptor) => {},
+  ),
 }));

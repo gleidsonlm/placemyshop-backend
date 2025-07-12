@@ -8,7 +8,9 @@ async function bootstrap() {
   // Swagger/OpenAPI configuration
   const config = new DocumentBuilder()
     .setTitle('PlaceMyShop Backend API')
-    .setDescription('A backend API for a SaaS platform helping liberal professionals and SMB offices manage their online presence and client interactions.')
+    .setDescription(
+      'A backend API for a SaaS platform helping liberal professionals and SMB offices manage their online presence and client interactions.',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {

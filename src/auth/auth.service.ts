@@ -1,13 +1,23 @@
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { PersonDocument } from '../users/schemas/person.schema';
+import { Role } from '../roles/schemas/role.schema';
+
+export interface JwtPayload {
+  email: string;
+  sub: string;
+  role: Role;
+  iat?: number;
+  exp?: number;
+}
 
 export interface UserPayload {
   '@id': string;
   email: string;
   givenName: string;
   familyName: string;
-  role: any;
+  role: Role;
 }
 
 export interface LoginResponse {
@@ -25,10 +35,14 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<UserPayload | null> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserPayload | null> {
     this.logger.log(`Validating user credentials for email: ${email}`);
-    
-    const user = await this.usersService.validatePassword(email, password);
+
+    const user: PersonDocument | null =
+      await this.usersService.validatePassword(email, password);
     if (user) {
       // Return user without password hash
       return {
@@ -42,11 +56,11 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any): Promise<LoginResponse> {
+  async login(user: UserPayload): Promise<LoginResponse> {
     this.logger.log(`Generating tokens for user: ${user.email}`);
-    
-    const payload = { 
-      email: user.email, 
+
+    const payload = {
+      email: user.email,
       sub: user['@id'],
       role: user.role,
     };
@@ -71,11 +85,13 @@ export class AuthService {
 
   async refreshToken(refreshToken: string): Promise<{ access_token: string }> {
     this.logger.log('Processing refresh token request');
-    
+
     try {
-      const payload = this.jwtService.verify(refreshToken);
-      const user = await this.usersService.findOne(payload.sub);
-      
+      const payload: JwtPayload = this.jwtService.verify(refreshToken);
+      const user: PersonDocument | null = await this.usersService.findOne(
+        payload.sub,
+      );
+
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
@@ -86,24 +102,28 @@ export class AuthService {
         role: user.role,
       };
 
-      const accessToken = await this.jwtService.signAsync(newPayload, { expiresIn: '15m' });
+      const accessToken = await this.jwtService.signAsync(newPayload, {
+        expiresIn: '15m',
+      });
 
       return {
         access_token: accessToken,
       };
-    } catch (error) {
-      this.logger.error('Invalid refresh token', error.message);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Invalid refresh token', errorMessage);
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
 
-  async validateUserById(userId: string): Promise<any> {
+  async validateUserById(userId: string): Promise<PersonDocument | null> {
     this.logger.log(`Validating user by ID: ${userId}`);
-    
+
     try {
       const user = await this.usersService.findOne(userId);
       return user;
-    } catch (error) {
+    } catch {
       this.logger.warn(`User not found: ${userId}`);
       return null;
     }

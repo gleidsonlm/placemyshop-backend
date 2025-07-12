@@ -13,7 +13,8 @@ import { PersonStatus } from '../schemas/person.schema';
 // As per schema.org/Person and issue requirements
 export class CreatePersonDto {
   @ApiPropertyOptional({
-    description: 'Unique identifier for the person (UUID v4). If not provided, will be auto-generated.',
+    description:
+      'Unique identifier for the person (UUID v4). If not provided, will be auto-generated.',
     example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
     format: 'uuid',
   })

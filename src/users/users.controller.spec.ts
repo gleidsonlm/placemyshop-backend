@@ -80,9 +80,13 @@ describe('UsersController', () => {
         roleId: 'role-uuid-456',
       };
 
-      mockUsersService.create.mockRejectedValue(new ConflictException('Email already exists'));
+      mockUsersService.create.mockRejectedValue(
+        new ConflictException('Email already exists'),
+      );
 
-      await expect(controller.create(createPersonDto)).rejects.toThrow(ConflictException);
+      await expect(controller.create(createPersonDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -119,9 +123,13 @@ describe('UsersController', () => {
     });
 
     it('should throw NotFoundException if person not found', async () => {
-      mockUsersService.findOne.mockRejectedValue(new NotFoundException('Person not found'));
+      mockUsersService.findOne.mockRejectedValue(
+        new NotFoundException('Person not found'),
+      );
 
-      await expect(controller.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(controller.findOne('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -135,9 +143,15 @@ describe('UsersController', () => {
       const updatedPerson = { ...mockPerson, ...updatePersonDto };
       mockUsersService.update.mockResolvedValue(updatedPerson);
 
-      const result = await controller.update('person-uuid-123', updatePersonDto);
+      const result = await controller.update(
+        'person-uuid-123',
+        updatePersonDto,
+      );
 
-      expect(service.update).toHaveBeenCalledWith('person-uuid-123', updatePersonDto);
+      expect(service.update).toHaveBeenCalledWith(
+        'person-uuid-123',
+        updatePersonDto,
+      );
       expect(result).toEqual(updatedPerson);
     });
   });

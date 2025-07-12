@@ -19,7 +19,6 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
-  ApiBody,
   ApiBearerAuth,
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
@@ -39,7 +38,10 @@ export class RolesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new role', description: 'Create a new role with specified permissions' })
+  @ApiOperation({
+    summary: 'Create a new role',
+    description: 'Create a new role with specified permissions',
+  })
   @ApiResponse({ status: 201, description: 'Role created successfully' })
   @ApiConflictResponse({ description: 'Role name already exists' })
   @ApiUnauthorizedResponse({ description: 'Authentication required' })
@@ -48,9 +50,22 @@ export class RolesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all roles', description: 'Retrieve a paginated list of roles' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+  @ApiOperation({
+    summary: 'Get all roles',
+    description: 'Retrieve a paginated list of roles',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
   @ApiResponse({ status: 200, description: 'List of roles' })
   @ApiUnauthorizedResponse({ description: 'Authentication required' })
   async findAll(
@@ -61,8 +76,15 @@ export class RolesController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get role by ID', description: 'Retrieve a specific role by ID' })
-  @ApiParam({ name: 'id', type: 'string', description: 'Role unique identifier' })
+  @ApiOperation({
+    summary: 'Get role by ID',
+    description: 'Retrieve a specific role by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Role unique identifier',
+  })
   @ApiResponse({ status: 200, description: 'Role found' })
   @ApiNotFoundResponse({ description: 'Role not found' })
   @ApiUnauthorizedResponse({ description: 'Authentication required' })
@@ -71,8 +93,15 @@ export class RolesController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update role', description: 'Update role information' })
-  @ApiParam({ name: 'id', type: 'string', description: 'Role unique identifier' })
+  @ApiOperation({
+    summary: 'Update role',
+    description: 'Update role information',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Role unique identifier',
+  })
   @ApiResponse({ status: 200, description: 'Role updated successfully' })
   @ApiNotFoundResponse({ description: 'Role not found' })
   @ApiUnauthorizedResponse({ description: 'Authentication required' })
@@ -86,7 +115,11 @@ export class RolesController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete role', description: 'Soft delete a role' })
-  @ApiParam({ name: 'id', type: 'string', description: 'Role unique identifier' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Role unique identifier',
+  })
   @ApiResponse({ status: 204, description: 'Role deleted successfully' })
   @ApiNotFoundResponse({ description: 'Role not found' })
   @ApiUnauthorizedResponse({ description: 'Authentication required' })
@@ -96,8 +129,15 @@ export class RolesController {
 
   @Post(':id/restore')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Restore role', description: 'Restore a soft-deleted role' })
-  @ApiParam({ name: 'id', type: 'string', description: 'Role unique identifier' })
+  @ApiOperation({
+    summary: 'Restore role',
+    description: 'Restore a soft-deleted role',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Role unique identifier',
+  })
   @ApiResponse({ status: 200, description: 'Role restored successfully' })
   @ApiNotFoundResponse({ description: 'Role not found' })
   @ApiUnauthorizedResponse({ description: 'Authentication required' })

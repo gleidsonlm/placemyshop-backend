@@ -10,23 +10,26 @@ export class BusinessesService {
   private readonly logger = new Logger(BusinessesService.name);
 
   constructor(
-    @InjectModel(Business.name) private readonly businessModel: Model<BusinessDocument>,
+    @InjectModel(Business.name)
+    private readonly businessModel: Model<BusinessDocument>,
   ) {}
 
-  async create(createBusinessDto: CreateBusinessDto): Promise<BusinessDocument> {
+  async create(
+    createBusinessDto: CreateBusinessDto,
+  ): Promise<BusinessDocument> {
     this.logger.log(`Creating new business: ${createBusinessDto.name}`);
 
     // Map founderId to founder field
-    const businessData: any = {
-      ...createBusinessDto,
-      founder: createBusinessDto.founderId,
+    const { founderId, ...businessDataWithoutFounderId } = createBusinessDto;
+    const businessData = {
+      ...businessDataWithoutFounderId,
+      founder: founderId,
     };
 
-    // Remove founderId from the data before saving
-    delete businessData.founderId;
-
     const createdBusiness = await this.businessModel.create(businessData);
-    this.logger.log(`Successfully created business with id: ${createdBusiness['@id']}`);
+    this.logger.log(
+      `Successfully created business with id: ${createdBusiness['@id']}`,
+    );
 
     // Return populated business
     const populatedBusiness = await this.businessModel
@@ -41,7 +44,10 @@ export class BusinessesService {
     return populatedBusiness;
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<BusinessDocument[]> {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<BusinessDocument[]> {
     this.logger.log(`Finding all businesses - page: ${page}, limit: ${limit}`);
 
     const skip = (page - 1) * limit;
@@ -78,11 +84,17 @@ export class BusinessesService {
       .exec();
   }
 
-  async update(id: string, updateBusinessDto: UpdateBusinessDto): Promise<BusinessDocument> {
+  async update(
+    id: string,
+    updateBusinessDto: UpdateBusinessDto,
+  ): Promise<BusinessDocument> {
     this.logger.log(`Updating business with id: ${id}`);
 
     const updatedBusiness = await this.businessModel
-      .findByIdAndUpdate(id, updateBusinessDto, { new: true, runValidators: true })
+      .findByIdAndUpdate(id, updateBusinessDto, {
+        new: true,
+        runValidators: true,
+      })
       .populate('founder')
       .exec();
 
@@ -119,7 +131,9 @@ export class BusinessesService {
     }
 
     if (!business.isDeleted) {
-      this.logger.warn(`Business with id ${id} is not deleted, no action needed`);
+      this.logger.warn(
+        `Business with id ${id} is not deleted, no action needed`,
+      );
       return business;
     }
 

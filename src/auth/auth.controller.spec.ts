@@ -5,7 +5,6 @@ import { UnauthorizedException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let service: AuthService;
 
   const mockUser = {
     '@id': 'user-uuid-123',
@@ -41,7 +40,6 @@ describe('AuthController', () => {
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
-    service = module.get<AuthService>(AuthService);
   });
 
   it('should be defined', () => {
@@ -51,12 +49,12 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should return login response with tokens', async () => {
       const request = { user: mockUser };
-      
+
       mockAuthService.login.mockResolvedValue(mockLoginResponse);
 
       const result = await controller.login(request);
 
-      expect(service.login).toHaveBeenCalledWith(mockUser);
+      expect(mockAuthService.login).toHaveBeenCalledWith(mockUser);
       expect(result).toEqual(mockLoginResponse);
     });
   });
@@ -70,16 +68,22 @@ describe('AuthController', () => {
 
       const result = await controller.refresh(refreshTokenDto);
 
-      expect(service.refreshToken).toHaveBeenCalledWith(refreshTokenDto.refresh_token);
+      expect(mockAuthService.refreshToken).toHaveBeenCalledWith(
+        refreshTokenDto.refresh_token,
+      );
       expect(result).toEqual(refreshResponse);
     });
 
     it('should throw UnauthorizedException for invalid refresh token', async () => {
       const refreshTokenDto = { refresh_token: 'invalid-refresh-token' };
 
-      mockAuthService.refreshToken.mockRejectedValue(new UnauthorizedException('Invalid refresh token'));
+      mockAuthService.refreshToken.mockRejectedValue(
+        new UnauthorizedException('Invalid refresh token'),
+      );
 
-      await expect(controller.refresh(refreshTokenDto)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.refresh(refreshTokenDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 

@@ -10,7 +10,6 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let model: Model<Person>;
 
   const mockPerson = {
     '@id': 'person-uuid-123',
@@ -49,7 +48,6 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    model = module.get<Model<Person>>(getModelToken(Person.name));
   });
 
   it('should be defined', () => {
@@ -78,7 +76,9 @@ describe('UsersService', () => {
 
       const result = await service.create(createPersonDto);
 
-      expect(mockPersonModel.findOne).toHaveBeenCalledWith({ email: createPersonDto.email });
+      expect(mockPersonModel.findOne).toHaveBeenCalledWith({
+        email: createPersonDto.email,
+      });
       expect(mockPersonModel.create).toHaveBeenCalled();
       expect(mockPersonModel.findById).toHaveBeenCalledWith(createdPerson._id);
       expect(result).toEqual(mockPerson);
@@ -95,7 +95,9 @@ describe('UsersService', () => {
 
       mockPersonModel.findOne.mockResolvedValue(mockPerson); // Email exists
 
-      await expect(service.create(createPersonDto)).rejects.toThrow(ConflictException);
+      await expect(service.create(createPersonDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -113,7 +115,9 @@ describe('UsersService', () => {
 
       const result = await service.findAll(1, 10);
 
-      expect(mockPersonModel.find).toHaveBeenCalledWith({ isDeleted: { $ne: true } });
+      expect(mockPersonModel.find).toHaveBeenCalledWith({
+        isDeleted: { $ne: true },
+      });
       expect(mockQuery.populate).toHaveBeenCalledWith('role');
       expect(mockQuery.skip).toHaveBeenCalledWith(0);
       expect(mockQuery.limit).toHaveBeenCalledWith(10);
@@ -145,7 +149,9 @@ describe('UsersService', () => {
 
       mockPersonModel.findById.mockReturnValue(mockQuery);
 
-      await expect(service.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -169,7 +175,7 @@ describe('UsersService', () => {
       expect(mockPersonModel.findByIdAndUpdate).toHaveBeenCalledWith(
         'person-uuid-123',
         updatePersonDto,
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
       expect(result).toEqual(updatedPerson);
     });
@@ -186,7 +192,9 @@ describe('UsersService', () => {
 
       mockPersonModel.findByIdAndUpdate.mockReturnValue(mockQuery);
 
-      await expect(service.update('nonexistent-id', updatePersonDto)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent-id', updatePersonDto),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -213,7 +221,9 @@ describe('UsersService', () => {
 
       mockPersonModel.findById.mockReturnValue(mockQuery);
 
-      await expect(service.remove('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

@@ -7,7 +7,6 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('BusinessesController', () => {
   let controller: BusinessesController;
-  let service: BusinessesService;
 
   const mockBusiness = {
     '@id': 'business-uuid-123',
@@ -45,7 +44,6 @@ describe('BusinessesController', () => {
     }).compile();
 
     controller = module.get<BusinessesController>(BusinessesController);
-    service = module.get<BusinessesService>(BusinessesService);
   });
 
   it('should be defined', () => {
@@ -63,7 +61,9 @@ describe('BusinessesController', () => {
 
       const result = await controller.create(createBusinessDto);
 
-      expect(service.create).toHaveBeenCalledWith(createBusinessDto);
+      expect(mockBusinessesService.create).toHaveBeenCalledWith(
+        createBusinessDto,
+      );
       expect(result).toEqual(mockBusiness);
     });
   });
@@ -75,7 +75,7 @@ describe('BusinessesController', () => {
 
       const result = await controller.findAll();
 
-      expect(service.findAll).toHaveBeenCalledWith(1, 10);
+      expect(mockBusinessesService.findAll).toHaveBeenCalledWith(1, 10);
       expect(result).toEqual(businesses);
     });
 
@@ -85,7 +85,7 @@ describe('BusinessesController', () => {
 
       const result = await controller.findAll(2, 20);
 
-      expect(service.findAll).toHaveBeenCalledWith(2, 20);
+      expect(mockBusinessesService.findAll).toHaveBeenCalledWith(2, 20);
       expect(result).toEqual(businesses);
     });
   });
@@ -96,14 +96,20 @@ describe('BusinessesController', () => {
 
       const result = await controller.findOne('business-uuid-123');
 
-      expect(service.findOne).toHaveBeenCalledWith('business-uuid-123');
+      expect(mockBusinessesService.findOne).toHaveBeenCalledWith(
+        'business-uuid-123',
+      );
       expect(result).toEqual(mockBusiness);
     });
 
     it('should throw NotFoundException if business not found', async () => {
-      mockBusinessesService.findOne.mockRejectedValue(new NotFoundException('Business not found'));
+      mockBusinessesService.findOne.mockRejectedValue(
+        new NotFoundException('Business not found'),
+      );
 
-      await expect(controller.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(controller.findOne('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -114,7 +120,9 @@ describe('BusinessesController', () => {
 
       const result = await controller.findByFounder('person-uuid-456');
 
-      expect(service.findByFounder).toHaveBeenCalledWith('person-uuid-456');
+      expect(mockBusinessesService.findByFounder).toHaveBeenCalledWith(
+        'person-uuid-456',
+      );
       expect(result).toEqual(businesses);
     });
   });
@@ -129,9 +137,15 @@ describe('BusinessesController', () => {
       const updatedBusiness = { ...mockBusiness, ...updateBusinessDto };
       mockBusinessesService.update.mockResolvedValue(updatedBusiness);
 
-      const result = await controller.update('business-uuid-123', updateBusinessDto);
+      const result = await controller.update(
+        'business-uuid-123',
+        updateBusinessDto,
+      );
 
-      expect(service.update).toHaveBeenCalledWith('business-uuid-123', updateBusinessDto);
+      expect(mockBusinessesService.update).toHaveBeenCalledWith(
+        'business-uuid-123',
+        updateBusinessDto,
+      );
       expect(result).toEqual(updatedBusiness);
     });
   });
@@ -143,7 +157,9 @@ describe('BusinessesController', () => {
 
       const result = await controller.remove('business-uuid-123');
 
-      expect(service.remove).toHaveBeenCalledWith('business-uuid-123');
+      expect(mockBusinessesService.remove).toHaveBeenCalledWith(
+        'business-uuid-123',
+      );
       expect(result).toEqual(deletedBusiness);
     });
   });
@@ -154,7 +170,9 @@ describe('BusinessesController', () => {
 
       const result = await controller.restore('business-uuid-123');
 
-      expect(service.restore).toHaveBeenCalledWith('business-uuid-123');
+      expect(mockBusinessesService.restore).toHaveBeenCalledWith(
+        'business-uuid-123',
+      );
       expect(result).toEqual(mockBusiness);
     });
   });

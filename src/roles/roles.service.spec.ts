@@ -14,7 +14,10 @@ describe('RolesService', () => {
   const mockRole = {
     '@id': 'role-uuid-123',
     roleName: RoleName.MANAGER,
-    permissions: [Permission.MANAGE_CUSTOMERS_MANAGER, Permission.ACCESS_CUSTOMER_CHAT_FULL_MANAGER],
+    permissions: [
+      Permission.MANAGE_CUSTOMERS_MANAGER,
+      Permission.ACCESS_CUSTOMER_CHAT_FULL_MANAGER,
+    ],
     save: jest.fn(),
     softDelete: jest.fn(),
     restore: jest.fn(),
@@ -62,7 +65,9 @@ describe('RolesService', () => {
 
       const result = await service.create(createRoleDto);
 
-      expect(mockRoleModel.findOne).toHaveBeenCalledWith({ roleName: createRoleDto.roleName });
+      expect(mockRoleModel.findOne).toHaveBeenCalledWith({
+        roleName: createRoleDto.roleName,
+      });
       expect(mockRoleModel.create).toHaveBeenCalled();
       expect(result).toEqual(mockRole);
     });
@@ -75,7 +80,9 @@ describe('RolesService', () => {
 
       mockRoleModel.findOne.mockResolvedValue(mockRole); // Role name exists
 
-      await expect(service.create(createRoleDto)).rejects.toThrow(ConflictException);
+      await expect(service.create(createRoleDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -92,7 +99,9 @@ describe('RolesService', () => {
 
       const result = await service.findAll(1, 10);
 
-      expect(mockRoleModel.find).toHaveBeenCalledWith({ isDeleted: { $ne: true } });
+      expect(mockRoleModel.find).toHaveBeenCalledWith({
+        isDeleted: { $ne: true },
+      });
       expect(mockQuery.skip).toHaveBeenCalledWith(0);
       expect(mockQuery.limit).toHaveBeenCalledWith(10);
       expect(result).toEqual(roles);
@@ -112,7 +121,9 @@ describe('RolesService', () => {
     it('should throw NotFoundException if role not found', async () => {
       mockRoleModel.findById.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -134,7 +145,7 @@ describe('RolesService', () => {
       expect(mockRoleModel.findByIdAndUpdate).toHaveBeenCalledWith(
         'role-uuid-123',
         updateRoleDto,
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
       expect(result).toEqual(updatedRole);
     });
@@ -150,7 +161,9 @@ describe('RolesService', () => {
 
       mockRoleModel.findByIdAndUpdate.mockReturnValue(mockQuery);
 
-      await expect(service.update('nonexistent-id', updateRoleDto)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent-id', updateRoleDto),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -169,7 +182,9 @@ describe('RolesService', () => {
     it('should throw NotFoundException if role not found', async () => {
       mockRoleModel.findById.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

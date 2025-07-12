@@ -39,7 +39,10 @@ export class UsersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new user', description: 'Create a new user with the provided information' })
+  @ApiOperation({
+    summary: 'Create a new user',
+    description: 'Create a new user with the provided information',
+  })
   @ApiBody({
     type: CreatePersonDto,
     description: 'User creation data',
@@ -89,7 +92,10 @@ export class UsersController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all users', description: 'Retrieve a paginated list of users' })
+  @ApiOperation({
+    summary: 'Get all users',
+    description: 'Retrieve a paginated list of users',
+  })
   @ApiQuery({
     name: 'page',
     required: false,
@@ -132,7 +138,10 @@ export class UsersController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get user by ID', description: 'Retrieve a specific user by their ID' })
+  @ApiOperation({
+    summary: 'Get user by ID',
+    description: 'Retrieve a specific user by their ID',
+  })
   @ApiParam({
     name: 'id',
     type: 'string',
@@ -171,7 +180,10 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update user', description: 'Update user information' })
+  @ApiOperation({
+    summary: 'Update user',
+    description: 'Update user information',
+  })
   @ApiParam({
     name: 'id',
     type: 'string',
@@ -245,7 +257,10 @@ export class UsersController {
 
   @Post(':id/restore')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Restore user', description: 'Restore a soft-deleted user' })
+  @ApiOperation({
+    summary: 'Restore user',
+    description: 'Restore a soft-deleted user',
+  })
   @ApiParam({
     name: 'id',
     type: 'string',

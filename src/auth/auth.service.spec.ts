@@ -6,8 +6,6 @@ import { UnauthorizedException } from '@nestjs/common';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let usersService: UsersService;
-  let jwtService: JwtService;
 
   const mockUser = {
     '@id': 'user-uuid-123',
@@ -50,8 +48,6 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    usersService = module.get<UsersService>(UsersService);
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
@@ -62,9 +58,15 @@ describe('AuthService', () => {
     it('should return user data if credentials are valid', async () => {
       mockUsersService.validatePassword.mockResolvedValue(mockUser);
 
-      const result = await service.validateUser('john.doe@example.com', 'password123');
+      const result = await service.validateUser(
+        'john.doe@example.com',
+        'password123',
+      );
 
-      expect(usersService.validatePassword).toHaveBeenCalledWith('john.doe@example.com', 'password123');
+      expect(mockUsersService.validatePassword).toHaveBeenCalledWith(
+        'john.doe@example.com',
+        'password123',
+      );
       expect(result).toEqual({
         '@id': mockUser['@id'],
         email: mockUser.email,
@@ -77,7 +79,10 @@ describe('AuthService', () => {
     it('should return null if credentials are invalid', async () => {
       mockUsersService.validatePassword.mockResolvedValue(null);
 
-      const result = await service.validateUser('john.doe@example.com', 'wrongpassword');
+      const result = await service.validateUser(
+        'john.doe@example.com',
+        'wrongpassword',
+      );
 
       expect(result).toBeNull();
     });
@@ -96,7 +101,7 @@ describe('AuthService', () => {
 
       const result = await service.login(mockUser);
 
-      expect(jwtService.signAsync).toHaveBeenCalledTimes(2);
+      expect(mockJwtService.signAsync).toHaveBeenCalledTimes(2);
       expect(result).toEqual({
         access_token: mockTokens.access_token,
         refresh_token: mockTokens.refresh_token,
@@ -123,8 +128,8 @@ describe('AuthService', () => {
 
       const result = await service.refreshToken(refreshToken);
 
-      expect(jwtService.verify).toHaveBeenCalledWith(refreshToken);
-      expect(usersService.findOne).toHaveBeenCalledWith(payload.sub);
+      expect(mockJwtService.verify).toHaveBeenCalledWith(refreshToken);
+      expect(mockUsersService.findOne).toHaveBeenCalledWith(payload.sub);
       expect(result).toEqual({
         access_token: newAccessToken,
       });
@@ -137,7 +142,9 @@ describe('AuthService', () => {
         throw new Error('Invalid token');
       });
 
-      await expect(service.refreshToken(refreshToken)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshToken(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -147,7 +154,9 @@ describe('AuthService', () => {
       mockJwtService.verify.mockReturnValue(payload);
       mockUsersService.findOne.mockResolvedValue(null);
 
-      await expect(service.refreshToken(refreshToken)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshToken(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -157,7 +166,7 @@ describe('AuthService', () => {
 
       const result = await service.validateUserById('user-uuid-123');
 
-      expect(usersService.findOne).toHaveBeenCalledWith('user-uuid-123');
+      expect(mockUsersService.findOne).toHaveBeenCalledWith('user-uuid-123');
       expect(result).toEqual(mockUser);
     });
 

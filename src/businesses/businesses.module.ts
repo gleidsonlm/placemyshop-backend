@@ -6,7 +6,9 @@ import { BusinessesService } from './businesses.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Business.name, schema: BusinessSchema }]),
+    MongooseModule.forFeature([
+      { name: Business.name, schema: BusinessSchema },
+    ]),
   ],
   controllers: [BusinessesController],
   providers: [BusinessesService],
