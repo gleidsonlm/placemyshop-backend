@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsEnum,
   MinLength,
-  IsUUID,
 } from 'class-validator';
 import { PersonStatus } from '../schemas/person.schema';
 

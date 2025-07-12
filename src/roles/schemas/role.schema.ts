@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Model } from 'mongoose'; // Import Model
+import { Document } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 // Define specific permissions as string constants or enums for better maintainability
@@ -68,15 +68,19 @@ RoleSchema.virtual('dateModified').get(function (this: RoleDocument) {
 
 RoleSchema.set('toJSON', {
   virtuals: true,
-  transform: function (doc: any, ret: any) {
+  transform: function (doc: RoleDocument, ret: Record<string, unknown>) {
     ret['@context'] = 'https://schema.org'; // Or appropriate context if not schema.org
     ret['@type'] = 'Role';
 
     // Ensure the main document's @id is correctly set
-    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
-      ret['@id'] = doc['@id'];
+    if (
+      typeof (doc as unknown as Record<string, unknown>)['@id'] === 'string' &&
+      String((doc as unknown as Record<string, unknown>)['@id']).length > 0
+    ) {
+      ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
     } else if (doc._id) {
       // Mongoose Document _id
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       ret['@id'] = doc._id.toString();
     }
 

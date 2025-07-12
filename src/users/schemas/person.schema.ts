@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types, Model } from 'mongoose'; // Import Model
+import { Document, Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid'; // For generating UUIDs
 import { Role } from '../../roles/schemas/role.schema'; // Import Role type for populated fields
 
@@ -82,14 +82,18 @@ PersonSchema.virtual('dateModified').get(function (this: PersonDocument) {
 // Ensure virtuals are included in toJSON and toObject outputs
 PersonSchema.set('toJSON', {
   virtuals: true,
-  transform: function (doc: any, ret: any) {
+  transform: function (doc: PersonDocument, ret: Record<string, unknown>) {
     ret['@context'] = 'https://schema.org';
     ret['@type'] = 'Person';
 
     // Ensure the main document's @id is correctly set
-    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
-      ret['@id'] = doc['@id'];
+    if (
+      typeof (doc as unknown as Record<string, unknown>)['@id'] === 'string' &&
+      String((doc as unknown as Record<string, unknown>)['@id']).length > 0
+    ) {
+      ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
     } else if (doc._id) {
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       ret['@id'] = doc._id.toString();
     }
 
@@ -192,14 +196,16 @@ PersonSchema.index(
 // For now, we'll rely on service-level filtering for soft-deleted documents.
 
 // Add a method for soft deleting
-PersonSchema.methods.softDelete = function () {
+
+PersonSchema.methods.softDelete = function (this: PersonDocument) {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
 // Add a method for restoring a soft-deleted document
-PersonSchema.methods.restore = function () {
+
+PersonSchema.methods.restore = function (this: PersonDocument) {
   this.deletedAt = null;
   this.isDeleted = false;
   return this.save();

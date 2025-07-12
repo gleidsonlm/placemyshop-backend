@@ -5,12 +5,7 @@ import {
 } from '@nestjs/mongoose'; // Import getConnectionToken
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import {
-  Connection,
-  Model,
-  Types,
-  Document as MongooseDocument,
-} from 'mongoose'; // Removed direct connect, added MongooseDocument for clarity
+import { Connection, Model } from 'mongoose';
 import {
   Person,
   PersonSchema,
