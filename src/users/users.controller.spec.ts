@@ -8,7 +8,6 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('UsersController', () => {
   let controller: UsersController;
-  let service: UsersService;
 
   const mockPerson = {
     '@id': 'person-uuid-123',
@@ -46,7 +45,6 @@ describe('UsersController', () => {
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
-    service = module.get<UsersService>(UsersService);
   });
 
   it('should be defined', () => {
@@ -67,7 +65,7 @@ describe('UsersController', () => {
 
       const result = await controller.create(createPersonDto);
 
-      expect(service.create).toHaveBeenCalledWith(createPersonDto);
+      expect(mockUsersService.create).toHaveBeenCalledWith(createPersonDto);
       expect(result).toEqual(mockPerson);
     });
 
@@ -97,7 +95,7 @@ describe('UsersController', () => {
 
       const result = await controller.findAll();
 
-      expect(service.findAll).toHaveBeenCalledWith(1, 10);
+      expect(mockUsersService.findAll).toHaveBeenCalledWith(1, 10);
       expect(result).toEqual(persons);
     });
 
@@ -107,7 +105,7 @@ describe('UsersController', () => {
 
       const result = await controller.findAll(2, 20);
 
-      expect(service.findAll).toHaveBeenCalledWith(2, 20);
+      expect(mockUsersService.findAll).toHaveBeenCalledWith(2, 20);
       expect(result).toEqual(persons);
     });
   });
@@ -118,7 +116,7 @@ describe('UsersController', () => {
 
       const result = await controller.findOne('person-uuid-123');
 
-      expect(service.findOne).toHaveBeenCalledWith('person-uuid-123');
+      expect(mockUsersService.findOne).toHaveBeenCalledWith('person-uuid-123');
       expect(result).toEqual(mockPerson);
     });
 
@@ -148,7 +146,7 @@ describe('UsersController', () => {
         updatePersonDto,
       );
 
-      expect(service.update).toHaveBeenCalledWith(
+      expect(mockUsersService.update).toHaveBeenCalledWith(
         'person-uuid-123',
         updatePersonDto,
       );
@@ -163,7 +161,7 @@ describe('UsersController', () => {
 
       const result = await controller.remove('person-uuid-123');
 
-      expect(service.remove).toHaveBeenCalledWith('person-uuid-123');
+      expect(mockUsersService.remove).toHaveBeenCalledWith('person-uuid-123');
       expect(result).toEqual(deletedPerson);
     });
   });
@@ -174,7 +172,7 @@ describe('UsersController', () => {
 
       const result = await controller.restore('person-uuid-123');
 
-      expect(service.restore).toHaveBeenCalledWith('person-uuid-123');
+      expect(mockUsersService.restore).toHaveBeenCalledWith('person-uuid-123');
       expect(result).toEqual(mockPerson);
     });
   });

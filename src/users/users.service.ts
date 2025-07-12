@@ -39,15 +39,17 @@ export class UsersService {
     );
 
     // Create person document
-    const personData: any = {
-      ...createPersonDto,
-      passwordHash,
-      role: createPersonDto.roleId,
-    };
+    const { roleId, ...personDataWithoutSensitive } = createPersonDto;
 
-    // Remove password and roleId from the data before saving
-    delete personData.password;
-    delete personData.roleId;
+    // Create the final data structure for database insertion
+    const personData: Omit<CreatePersonDto, 'password' | 'roleId'> & {
+      passwordHash: string;
+      role: string;
+    } = {
+      ...personDataWithoutSensitive,
+      passwordHash,
+      role: roleId,
+    };
 
     const createdPerson = await this.personModel.create(personData);
     this.logger.log(
@@ -111,20 +113,20 @@ export class UsersService {
     this.logger.log(`Updating person with id: ${id}`);
 
     // If password is being updated, hash it
-    const updateData: any = { ...updatePersonDto };
-    if (updatePersonDto.password) {
+    const { password, roleId, ...baseUpdateData } = updatePersonDto;
+    const updateData: typeof baseUpdateData & {
+      passwordHash?: string;
+      role?: string;
+    } = { ...baseUpdateData };
+
+    if (password) {
       const saltRounds = 12;
-      updateData.passwordHash = await bcrypt.hash(
-        updatePersonDto.password,
-        saltRounds,
-      );
-      delete updateData.password;
+      updateData.passwordHash = await bcrypt.hash(password, saltRounds);
     }
 
     // If roleId is provided, map it to role field
-    if (updatePersonDto.roleId) {
-      updateData.role = updatePersonDto.roleId;
-      delete updateData.roleId;
+    if (roleId) {
+      updateData.role = roleId;
     }
 
     const updatedPerson = await this.personModel

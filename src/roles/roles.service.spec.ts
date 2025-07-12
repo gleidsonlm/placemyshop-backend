@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { RolesService } from './roles.service';
 import { Role, RoleName, Permission } from './schemas/role.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -9,7 +8,6 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('RolesService', () => {
   let service: RolesService;
-  let model: Model<Role>;
 
   const mockRole = {
     '@id': 'role-uuid-123',
@@ -46,7 +44,6 @@ describe('RolesService', () => {
     }).compile();
 
     service = module.get<RolesService>(RolesService);
-    model = module.get<Model<Role>>(getModelToken(Role.name));
   });
 
   it('should be defined', () => {
