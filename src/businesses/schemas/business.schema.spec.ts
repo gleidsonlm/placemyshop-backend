@@ -185,10 +185,6 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       if (!populatedBusiness) return;
 
       const businessJSON = populatedBusiness.toJSON({ virtuals: true });
-      console.log(
-        'businessJSON.founder (populated test):',
-        JSON.stringify(businessJSON.founder, null, 2),
-      );
       const founderAsAny = businessJSON.founder as any;
 
       expect(founderAsAny).toBeDefined();

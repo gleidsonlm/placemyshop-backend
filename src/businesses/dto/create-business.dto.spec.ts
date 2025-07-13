@@ -129,12 +129,6 @@ describe('CreateBusinessDto', () => {
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       const sameAsError = errors.find((e) => e.property === 'sameAs');
-      if (sameAsError) {
-        console.log(
-          'sameAsError structure:',
-          JSON.stringify(sameAsError, null, 2),
-        );
-      }
       expect(sameAsError).toBeDefined();
       // This checks the nested error for the invalid URL in the array
       // For arrays of primitives, the constraint violation is usually directly on the property

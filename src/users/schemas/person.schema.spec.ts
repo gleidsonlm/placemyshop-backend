@@ -210,10 +210,6 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       if (!populatedPersonDoc) return;
 
       const personJSON = populatedPersonDoc.toJSON({ virtuals: true });
-      console.log(
-        'personJSON.role (populated test):',
-        JSON.stringify(personJSON.role, null, 2),
-      );
       const roleAsAny = personJSON.role as any;
 
       expect(roleAsAny).toBeDefined();
