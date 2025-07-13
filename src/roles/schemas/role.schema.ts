@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Model } from 'mongoose'; // Import Model
 import { v4 as uuidv4 } from 'uuid';
 
 // Define specific permissions as string constants or enums for better maintainability
@@ -30,12 +30,8 @@ export enum RoleName {
 export interface RoleDocument extends Role, Document {
   createdAt: Date;
   updatedAt: Date;
-  softDelete(): Promise<
-    this & Document<unknown, Record<string, unknown>, RoleDocument>
-  >;
-  restore(): Promise<
-    this & Document<unknown, Record<string, unknown>, RoleDocument>
-  >;
+  softDelete(): Promise<this & Document<unknown, {}, RoleDocument>>;
+  restore(): Promise<this & Document<unknown, {}, RoleDocument>>;
 }
 
 @Schema({ timestamps: true, collection: 'roles' })
@@ -62,30 +58,24 @@ export class Role {
 
 export const RoleSchema = SchemaFactory.createForClass(Role);
 
-RoleSchema.virtual('dateCreated').get(function (this: RoleDocument) {
+RoleSchema.virtual('dateCreated').get(function(this: RoleDocument) {
   return this.createdAt;
 });
 
-RoleSchema.virtual('dateModified').get(function (this: RoleDocument) {
+RoleSchema.virtual('dateModified').get(function(this: RoleDocument) {
   return this.updatedAt;
 });
 
 RoleSchema.set('toJSON', {
   virtuals: true,
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
-  transform: function (doc: any, ret: any) {
+  transform: function(doc: any, ret: any) {
     ret['@context'] = 'https://schema.org'; // Or appropriate context if not schema.org
     ret['@type'] = 'Role';
 
     // Ensure the main document's @id is correctly set
-    if (
-      typeof (doc as unknown as Record<string, unknown>)['@id'] === 'string' &&
-      String((doc as unknown as Record<string, unknown>)['@id']).length > 0
-    ) {
-      ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
-    } else if (doc._id) {
-      // Mongoose Document _id
-
+    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
+      ret['@id'] = doc['@id'];
+    } else if (doc._id) { // Mongoose Document _id
       ret['@id'] = doc._id.toString();
     }
 
@@ -96,38 +86,30 @@ RoleSchema.set('toJSON', {
     // delete ret._id;
     // delete ret.__v;
     return ret;
-  },
+  }
 });
 RoleSchema.set('toObject', { virtuals: true });
 
 // Indexes
-RoleSchema.index(
-  { isDeleted: 1, roleName: 1 },
-  { unique: true, partialFilterExpression: { isDeleted: false } },
-);
-RoleSchema.index(
-  { isDeleted: 1, '@id': 1 },
-  { unique: true, partialFilterExpression: { isDeleted: false } },
-);
+RoleSchema.index({ isDeleted: 1, roleName: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+RoleSchema.index({ isDeleted: 1, '@id': 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+
 
 // Soft delete methods
-
-RoleSchema.methods.softDelete = function (this: RoleDocument) {
+RoleSchema.methods.softDelete = function() {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
-RoleSchema.methods.restore = function (this: RoleDocument) {
-  this.deletedAt = undefined;
+RoleSchema.methods.restore = function() {
+  this.deletedAt = null;
   this.isDeleted = false;
   return this.save();
 };
 
 // Helper to map RoleName to its default permissions
-export const getDefaultPermissionsForRole = (
-  roleName: RoleName,
-): Permission[] => {
+export const getDefaultPermissionsForRole = (roleName: RoleName): Permission[] => {
   switch (roleName) {
     case RoleName.ADMIN:
       return [

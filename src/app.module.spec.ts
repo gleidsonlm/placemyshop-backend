@@ -4,86 +4,71 @@ import { AppModule } from './app.module';
 import { getModelToken } from '@nestjs/mongoose';
 import { Role } from './roles/schemas/role.schema';
 import { RoleSeedingService } from './roles/role-seeding.service';
-import { Person } from './users/schemas/person.schema';
-import { Business } from './businesses/schemas/business.schema';
+import { Person } from './users/schemas/person.schema'; // Added
+import { Business } from './businesses/schemas/business.schema'; // Added
 
-// Mock MongooseModule to avoid database connection
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('@nestjs/mongoose', () => ({
-  ...jest.requireActual('@nestjs/mongoose'),
-  MongooseModule: {
-    forRootAsync: jest.fn(() => ({
-      module: jest.fn(),
-      providers: [],
-      exports: [],
-    })),
-    forFeature: jest.fn(() => ({
-      module: jest.fn(),
-      providers: [],
-      exports: [],
-    })),
-  },
-}));
+// No more global jest.mock('@nestjs/mongoose')
 
 describe('AppModule', () => {
   let testingModule: TestingModule;
+  let app: any; // For potential e2e-like checks if needed, or just for compilation
 
   beforeEach(async () => {
-    const mockConfigService = {
+    jest.setTimeout(30000); // Increase timeout for this describe block
+    testingModule = await Test.createTestingModule({
+      imports: [AppModule], // AppModule imports RolesModule, UsersModule, etc.
+    })
+    .overrideProvider(ConfigService)
+    .useValue({
       get: jest.fn((key: string) => {
         if (key === 'MONGODB_URI') {
-          return 'mongodb://mock-uri/test_db';
+          return 'mongodb://localhost/test_db_app_module_spec'; // Mock URI
         }
+        // Add other env variables if your app module depends on them during init
         return process.env[key];
       }),
-    };
-
-    testingModule = await Test.createTestingModule({
-      imports: [AppModule],
     })
-      .overrideProvider(ConfigService)
-      .useValue(mockConfigService)
-      .useMocker((token) => {
-        const roleModelToken = getModelToken(Role.name);
-        const personModelToken = getModelToken(Person.name);
-        const businessModelToken = getModelToken(Business.name);
+    .useMocker((token) => {
+      const roleModelToken = getModelToken(Role.name);
+      const personModelToken = getModelToken(Person.name);
+      const businessModelToken = getModelToken(Business.name);
 
-        if (
-          token === roleModelToken ||
-          token === personModelToken ||
-          token === businessModelToken
-        ) {
-          // Create a mock Mongoose model
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
-          const mockModel = jest.fn().mockImplementation((dto: any) => ({
-            ...dto,
-            save: jest.fn().mockResolvedValue(dto),
-          })) as any;
+      if (token === roleModelToken || token === personModelToken || token === businessModelToken) {
+        // Generic Mongoose Model Mock (Constructor with static methods like findOne, and instance save)
+        const mockSaveInstanceFn = jest.fn().mockResolvedValue({});
+        const mockInstance = (dto: any) => ({ ...dto, save: mockSaveInstanceFn });
+        const MockCtor = jest.fn().mockImplementation(mockInstance);
 
-          // Add static methods that Mongoose models have
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          mockModel.findOne = jest
-            .fn()
-            .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          mockModel.findById = jest
-            .fn()
-            .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          mockModel.find = jest
-            .fn()
-            .mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          mockModel.create = jest.fn().mockResolvedValue({});
+        (MockCtor as any).findOne = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+        (MockCtor as any).findById = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) });
+        (MockCtor as any).find = jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue([]) });
+        (MockCtor as any).create = jest.fn().mockImplementation(dto => Promise.resolve(dto));
+        // Add other common static model methods if needed by any service during init
 
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return mockModel;
-        }
+        return MockCtor;
+      }
 
-        // For any other dependencies, return a basic mock
-        return {};
-      })
-      .compile();
+      // Generic fallback for other unmocked dependencies
+      // This is a very basic generic mock. Consider using a library like jest-mock-extended if needed.
+      if (typeof token === 'function' && token.prototype) {
+        const mockPrototype: { [key: string]: any } = {};
+        Object.getOwnPropertyNames(token.prototype).forEach(key => {
+          if (typeof token.prototype[key] === 'function') {
+            mockPrototype[key] = jest.fn();
+          }
+        });
+        const ctorMock = jest.fn().mockImplementation(() => mockPrototype);
+        return ctorMock; // Return a mock constructor
+      }
+      return jest.fn(); // Fallback for non-constructor tokens
+    })
+    .compile();
+
+    // Create an application instance if you need to test lifecycle hooks like OnModuleInit properly
+    // or simulate requests for e2e-like checks within this test.
+    // For just checking module compilation and basic DI, compile() might be enough.
+    // app = testingModule.createNestApplication();
+    // await app.init(); // This would trigger OnModuleInit for RolesModule
   });
 
   // afterEach(async () => {

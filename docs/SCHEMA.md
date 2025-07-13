@@ -11,6 +11,16 @@ JSON-LD is chosen for its ability to:
 -   **Leverage Existing JSON Tooling:** JSON-LD is built on top of JSON, meaning we can use existing JSON parsers and libraries.
 -   **Support Linked Data Principles:** It enables the creation of a web of data, where entities can be linked to other entities, both within and outside our domain.
 
+## Modules
+
+The application is divided into several modules, each with a specific responsibility. The most important ones are:
+
+-   **`auth` module:** Handles user authentication. It provides a `/login` endpoint that returns a JWT upon successful authentication.
+-   **`permissions` module:** Manages the application's role-based access control (RBAC) system. It provides a `PermissionsGuard` that checks if a user has the required permissions to access a specific route.
+-   **`users` module:** Manages user-related operations, such as creating, reading, updating, and deleting users.
+-   **`roles` module:** Manages user roles and their associated permissions.
+-   **`businesses` module:** Manages business-related operations.
+
 ## Core Entities
 
 The primary entities implemented are Person (User), Role, and Business.

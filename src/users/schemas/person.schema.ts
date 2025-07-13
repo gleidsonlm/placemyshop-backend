@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document, Types, Model } from 'mongoose'; // Import Model
 import { v4 as uuidv4 } from 'uuid'; // For generating UUIDs
 import { Role } from '../../roles/schemas/role.schema'; // Import Role type for populated fields
 
@@ -16,12 +16,8 @@ export enum PersonStatus {
 export interface PersonDocument extends Person, Document {
   createdAt: Date;
   updatedAt: Date;
-  softDelete(): Promise<
-    this & Document<unknown, Record<string, unknown>, PersonDocument>
-  >; // Add method signatures
-  restore(): Promise<
-    this & Document<unknown, Record<string, unknown>, PersonDocument>
-  >;
+  softDelete(): Promise<this & Document<unknown, {}, PersonDocument>>; // Add method signatures
+  restore(): Promise<this & Document<unknown, {}, PersonDocument>>;
 }
 
 @Schema({ timestamps: true, collection: 'persons' })
@@ -52,12 +48,7 @@ export class Person {
   @Prop({ type: Types.ObjectId, ref: 'Role', index: true }) // Assuming 'Role' is the name of the Role model
   role: Types.ObjectId | Role; // This will be populated with Role details if needed
 
-  @Prop({
-    type: String,
-    enum: PersonStatus,
-    default: PersonStatus.ACTIVE,
-    index: true,
-  })
+  @Prop({ type: String, enum: PersonStatus, default: PersonStatus.ACTIVE, index: true })
   status: PersonStatus;
 
   @Prop({ type: Date, default: null })
@@ -75,79 +66,68 @@ export class Person {
 export const PersonSchema = SchemaFactory.createForClass(Person);
 
 // For schema.org alignment in JSON output, virtuals can be used
-PersonSchema.virtual('dateCreated').get(function (this: PersonDocument) {
+PersonSchema.virtual('dateCreated').get(function(this: PersonDocument) {
   return this.createdAt;
 });
 
-PersonSchema.virtual('dateModified').get(function (this: PersonDocument) {
+PersonSchema.virtual('dateModified').get(function(this: PersonDocument) {
   return this.updatedAt;
 });
 
 // Ensure virtuals are included in toJSON and toObject outputs
 PersonSchema.set('toJSON', {
   virtuals: true,
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
   transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org';
     ret['@type'] = 'Person';
 
     // Ensure the main document's @id is correctly set
-    if (
-      typeof (doc as unknown as Record<string, unknown>)['@id'] === 'string' &&
-      String((doc as unknown as Record<string, unknown>)['@id']).length > 0
-    ) {
-      ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
+    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
+      ret['@id'] = doc['@id'];
     } else if (doc._id) {
       ret['@id'] = doc._id.toString();
     }
 
     // Customize the 'role' field output
+    if (ret.role && typeof ret.role === 'object') { // Check if role is populated (object)
+        const roleDoc = doc.role as any;
+        if (roleDoc && typeof roleDoc.toObject === 'function') {
+            const roleObject = roleDoc.toObject({ virtuals: true }); // Role's toJSON would have run
+            let roleIdValue = '';
+            // roleObject from toObject might not have @id directly if it wasn't transformed by Role's toJSON yet
+            // or if it's a plain object from a deeper population.
+            // Prefer roleDoc['@id'] or roleDoc._id from the original populated document.
+            if (typeof roleDoc['@id'] === 'string' && roleDoc['@id'].length > 0) {
+                roleIdValue = roleDoc['@id'];
+            } else if (roleDoc._id) {
+                roleIdValue = roleDoc._id.toString();
+            } else if (typeof roleObject['@id'] === 'string' && roleObject['@id'].length > 0){
+                roleIdValue = roleObject['@id'];
+            }
 
-    if (ret.role && typeof ret.role === 'object') {
-      // Check if role is populated (object)
-      const roleDoc = doc.role;
-      if (roleDoc && typeof roleDoc.toObject === 'function') {
-        const roleObject = roleDoc.toObject({ virtuals: true }); // Role's toJSON would have run
-        let roleIdValue = '';
-        // roleObject from toObject might not have @id directly if it wasn't transformed by Role's toJSON yet
-        // or if it's a plain object from a deeper population.
-        // Prefer roleDoc['@id'] or roleDoc._id from the original populated document.
-        if (typeof roleDoc['@id'] === 'string' && roleDoc['@id'].length > 0) {
-          roleIdValue = roleDoc['@id'];
-        } else if (roleDoc._id) {
-          roleIdValue = roleDoc._id.toString();
-        } else if (
-          typeof roleObject['@id'] === 'string' &&
-          roleObject['@id'].length > 0
-        ) {
-          roleIdValue = roleObject['@id'];
+            ret.role = {
+                '@type': 'Role', // Role's toJSON should handle its own @type and @context
+                '@id': roleIdValue,
+                ...(roleObject.roleName && { roleName: roleObject.roleName }),
+            };
+        } else if (ret.role._id) { // Fallback if role is somehow a plain object with _id
+             let roleIdValue = '';
+            if (typeof ret.role['@id'] === 'string' && ret.role['@id'].length > 0) {
+                roleIdValue = ret.role['@id'];
+            } else {
+                roleIdValue = ret.role._id.toString();
+            }
+            ret.role = {
+                '@type': 'Role',
+                '@id': roleIdValue,
+                ...(ret.role.roleName && { roleName: ret.role.roleName }),
+            };
         }
-
+    } else if (ret.role) { // If role is just an ObjectId (string or ObjectId)
         ret.role = {
-          '@type': 'Role', // Role's toJSON should handle its own @type and @context
-          '@id': roleIdValue,
-          ...(roleObject.roleName && { roleName: roleObject.roleName }),
+            '@type': 'Role',
+            '@id': ret.role.toString(), // This will be the ObjectId string
         };
-      } else if (ret.role._id) {
-        // Fallback if role is somehow a plain object with _id
-        let roleIdValue = '';
-        if (typeof ret.role['@id'] === 'string' && ret.role['@id'].length > 0) {
-          roleIdValue = ret.role['@id'];
-        } else {
-          roleIdValue = ret.role._id.toString();
-        }
-        ret.role = {
-          '@type': 'Role',
-          '@id': roleIdValue,
-          ...(ret.role.roleName && { roleName: ret.role.roleName }),
-        };
-      }
-    } else if (ret.role) {
-      // If role is just an ObjectId (string or ObjectId)
-      ret.role = {
-        '@type': 'Role',
-        '@id': ret.role.toString(), // This will be the ObjectId string
-      };
     }
 
     // Remove passwordHash from output
@@ -168,14 +148,8 @@ PersonSchema.set('toJSON', {
 PersonSchema.set('toObject', { virtuals: true });
 
 // Compound index for soft delete
-PersonSchema.index(
-  { isDeleted: 1, email: 1 },
-  { unique: true, partialFilterExpression: { isDeleted: false } },
-);
-PersonSchema.index(
-  { isDeleted: 1, '@id': 1 },
-  { unique: true, partialFilterExpression: { isDeleted: false } },
-);
+PersonSchema.index({ isDeleted: 1, email: 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+PersonSchema.index({ isDeleted: 1, '@id': 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
 
 // Pre-save hook for soft delete logic if needed, or handle in service layer
 // Example:
@@ -201,17 +175,15 @@ PersonSchema.index(
 // For now, we'll rely on service-level filtering for soft-deleted documents.
 
 // Add a method for soft deleting
-
-PersonSchema.methods.softDelete = function (this: PersonDocument) {
+PersonSchema.methods.softDelete = function() {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
 // Add a method for restoring a soft-deleted document
-
-PersonSchema.methods.restore = function (this: PersonDocument) {
-  this.deletedAt = undefined;
+PersonSchema.methods.restore = function() {
+  this.deletedAt = null;
   this.isDeleted = false;
   return this.save();
 };

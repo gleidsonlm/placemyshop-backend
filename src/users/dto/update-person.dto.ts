@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsString,
-  IsOptional,
-  IsEnum,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsString, IsOptional, IsEnum, MinLength, IsUUID } from 'class-validator';
 import { PersonStatus } from '../schemas/person.schema';
 
 export class UpdatePersonDto {

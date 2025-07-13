@@ -97,3 +97,32 @@ All related tests now pass.
 ```
 
 By following these guidelines, AI coding agents can contribute effectively and maintain the high quality standards of the `placemyshop-backend` project.
+
+## Role-Based Access Control (RBAC) and Permissions Matrix
+
+The application employs a Role-Based Access Control (RBAC) system to manage user permissions. Each user is assigned a role, and each role is granted a specific set of permissions. The system is designed to be extensible, allowing for the addition of new roles and permissions as the application grows.
+
+### Roles
+
+There are three primary roles in the system:
+
+-   **Admin:** The highest level of access. Admins can manage all aspects of the application, including user roles, business details, and system integrations.
+-   **Manager:** A mid-level role with permissions to manage customers and their interactions.
+-   **Assistant:** A role with limited permissions, primarily focused on customer support and communication.
+
+### Permissions Matrix
+
+The following matrix outlines the permissions granted to each role:
+
+| Permission                               | Admin | Manager | Assistant |
+| ---------------------------------------- | :---: | :-----: | :-------: |
+| `user_role_management.manage`            |   ✅   |    ❌    |     ❌     |
+| `business_details.manage`                |   ✅   |    ❌    |     ❌     |
+| `customers.manage_admin`                 |   ✅   |    ❌    |     ❌     |
+| `customer_chat.access_full_admin`        |   ✅   |    ❌    |     ❌     |
+| `external_integrations.manage`           |   ✅   |    ❌    |     ❌     |
+| `customers.manage_manager`               |   ✅   |    ✅    |     ❌     |
+| `customer_chat.access_full_manager`      |   ✅   |    ✅    |     ❌     |
+| `customer_chat.access_read_write`        |   ✅   |    ✅    |     ✅     |
+
+**Note:** The Admin role inherits all permissions from the Manager and Assistant roles.

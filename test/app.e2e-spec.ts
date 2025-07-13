@@ -24,7 +24,7 @@ describe('AppController (e2e)', () => {
   });
 
   afterEach(async () => {
-    if (app !== null && app !== undefined) {
+    if (app) {
       await app.close();
     }
   });

@@ -37,9 +37,7 @@ describe('UpdatePersonDto', () => {
       dto.email = 'not-an-email';
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'email')?.constraints?.isEmail,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'email')?.constraints?.isEmail).toBeDefined();
     });
   });
 
@@ -49,9 +47,7 @@ describe('UpdatePersonDto', () => {
       dto.password = 'short';
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'password')?.constraints?.minLength,
-      ).toContain('Password must be at least 8 characters long');
+      expect(errors.find(e => e.property === 'password')?.constraints?.minLength).toContain('Password must be at least 8 characters long');
     });
   });
 
@@ -61,9 +57,7 @@ describe('UpdatePersonDto', () => {
       dto.status = 'INVALID_STATUS_UPDATE' as PersonStatus;
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'status')?.constraints?.isEnum,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'status')?.constraints?.isEnum).toBeDefined();
     });
   });
 

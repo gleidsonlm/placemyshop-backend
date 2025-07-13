@@ -118,6 +118,16 @@ Upon application startup, the system automatically seeds essential data if it's 
 
 This ensures that the application has the necessary foundational data to operate correctly from the first run.
 
+## Authentication and Authorization
+
+The application uses a robust authentication and authorization system built on modern standards.
+
+-   **Authentication:** Authentication is handled using JSON Web Tokens (JWT). Clients must authenticate via the `/auth/login` endpoint to receive a JWT. This token must then be included in the `Authorization` header of subsequent requests as a Bearer token.
+
+-   **Authorization:** Authorization is managed through a role-based access control (RBAC) system. Each user is assigned a role (e.g., Admin, Manager), which has a specific set of permissions. The system uses a custom `PermissionsGuard` to protect routes based on these permissions, ensuring that users can only access the resources and perform the actions appropriate for their role.
+
+The core logic for this is encapsulated within the `auth` and `permissions` modules.
+
 ## Running Tests
 
 To run the test suites:
@@ -137,107 +147,16 @@ To run the test suites:
 
 These tests are integral to our development process. We follow Test-Driven Development (TDD) principles, meaning tests are typically written before or alongside the implementation code. See `AGENTS.md` for detailed TDD guidelines.
 
-## Testing
-
-This project uses Jest for testing with TypeScript support. The test configuration is designed to work with Node.js/npm.
-
-### Running Tests
-
-```bash
-# Run all unit tests (excludes schema tests that require MongoDB)
-npm run test:unit
-
-# Run all tests (requires MongoDB connection for schema tests)
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:cov
-
-# Run e2e tests (requires MongoDB connection)
-npm run test:e2e
-```
-
-### Test Structure
-
-- **Unit Tests:** DTO validation, service logic, controller behavior
-- **Schema Tests:** Mongoose schema validation and transformation (requires MongoDB)
-- **E2E Tests:** Full application integration tests
-
-### Bun Compatibility
-
-While Bun can be used for building and development, the current test suite uses Jest-specific APIs that are not compatible with Bun's test runner. For testing, please use npm:
-
-```bash
-# Use npm for testing
-npm test
-
-# Use Bun for development and building
-bun run start:dev
-bun run build
-```
-
-See `BUN_TESTING.md` for more details on Bun test compatibility.
-
 ## Documentation
 
-### API Documentation
+Project documentation is maintained across several key files. For detailed information on data structures and schemas, please refer to the `docs/SCHEMA.md` file.
 
-The PlaceMyShop Backend provides comprehensive API documentation:
+-   [`AGENTS.md`](./AGENTS.md): Provides guidelines for AI coding agents contributing to the project, with a strong emphasis on our Test-Driven Development (TDD) philosophy.
+-   [`docs/SCHEMA.md`](./docs/SCHEMA.md): Contains detailed descriptions and examples of the data schemas used in the application, such as `Person`, `Role`, and `Business`.
+-   **API Endpoint Documentation:** (In progress) Will provide a comprehensive reference for all available API endpoints.
 
-- **Interactive Documentation**: Visit http://localhost:3000/api/docs for the Swagger UI
-  - Test endpoints directly in your browser
-  - View request/response schemas
-  - Authenticate and test protected routes
-  
-- **API Usage Guide**: [`docs/API_USAGE_GUIDE.md`](./docs/API_USAGE_GUIDE.md) - Complete guide with cURL examples
-  - Authentication workflows
-  - CRUD operations for all endpoints
-  - Common workflows and troubleshooting
-  - Best practices and security guidelines
-
-### Schema Documentation
-
-- **Data Models**: [`docs/SCHEMA.md`](./docs/SCHEMA.md) - Detailed schema definitions using JSON-LD format
-
-### AI Coding Agent Guidelines
-
-For guidelines on how AI coding agents should contribute to this project:
-- **General AI Agent Guidelines:** [`AGENTS.md`](./AGENTS.md) - Contains project standards, TDD practices, and general AI agent responsibilities
-- **GitHub Copilot Pro Guidelines:** [`COPILOT_AGENTS.md`](./COPILOT_AGENTS.md) - Specific guidance for using GitHub Copilot Pro effectively with our NestJS/TypeScript/MongoDB stack
+The core logic for authentication and authorization is encapsulated within the `auth` and `permissions` modules, respectively. These modules are central to the application's security and access control mechanisms.
 
 ## License
 
 This project is MIT licensed.
-
-## API Overview
-
-The PlaceMyShop Backend provides a comprehensive REST API for managing users, roles, and businesses:
-
-### Core Endpoints
-
-- **Authentication**: `/auth` - Login, logout, token refresh, user profile
-- **Users**: `/users` - User management with role-based access
-- **Roles**: `/roles` - Role and permission management
-- **Businesses**: `/businesses` - Business profile management
-
-### Key Features
-
-- **JWT Authentication** with refresh tokens
-- **Role-based access control** with granular permissions
-- **Comprehensive validation** and error handling
-- **Pagination** support for list endpoints
-- **Soft delete** functionality with restore capabilities
-- **RESTful API design** following best practices
-- **Interactive API documentation** with Swagger/OpenAPI
-
-### Quick Start
-
-1. Start the application (see setup instructions above)
-2. Visit http://localhost:3000/api/docs for interactive documentation
-3. Use the login endpoint to authenticate and get JWT tokens
-4. Explore the API using the Swagger UI or cURL examples in the usage guide
-
-For detailed examples and workflows, see [`docs/API_USAGE_GUIDE.md`](./docs/API_USAGE_GUIDE.md).

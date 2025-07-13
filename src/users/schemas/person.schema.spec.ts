@@ -1,24 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-base-to-string */
-import {
-  getModelToken,
-  MongooseModule,
-  getConnectionToken,
-} from '@nestjs/mongoose'; // Import getConnectionToken
+import { getModelToken, MongooseModule, getConnectionToken } from '@nestjs/mongoose'; // Import getConnectionToken
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { Connection, Model } from 'mongoose';
-import {
-  Person,
-  PersonSchema,
-  PersonDocument,
-  PersonStatus,
-} from './person.schema';
-import {
-  Role,
-  RoleSchema,
-  RoleDocument,
-  RoleName,
-} from '../../roles/schemas/role.schema';
+import { Connection, Model, Types, Document as MongooseDocument } from 'mongoose'; // Removed direct connect, added MongooseDocument for clarity
+import { Person, PersonSchema, PersonDocument, PersonStatus } from './person.schema';
+import { Role, RoleSchema, RoleDocument, RoleName } from '../../roles/schemas/role.schema';
 
 // Helper to connect Mongoose and get a connection for testing purposes
 // This is simplified; for full NestJS module testing, MongooseModule.forRootAsync is better
@@ -60,7 +45,7 @@ describe('Person Schema (with NestJS Testing Module)', () => {
     testRole = await new roleModel({
       '@id': 'role-uuid-for-person-test',
       roleName: RoleName.ASSISTANT,
-      permissions: [],
+      permissions: []
     }).save();
 
     await personModel.deleteMany({});
@@ -75,6 +60,7 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       await collection.deleteMany({});
     }
   });
+
 
   describe('Instance Methods', () => {
     it('should soft delete a person', async () => {
@@ -97,15 +83,11 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       expect(person.deletedAt).toBeInstanceOf(Date);
       expect(saveSpy).toHaveBeenCalled();
 
-      const foundWithDeleted = await personModel
-        .findOne({ _id: person._id, isDeleted: true })
-        .exec();
+      const foundWithDeleted = await personModel.findOne({ _id: person._id, isDeleted: true }).exec();
       expect(foundWithDeleted).not.toBeNull();
       expect(foundWithDeleted?.isDeleted).toBe(true);
 
-      const foundNonDeleted = await personModel
-        .findOne({ _id: person._id, isDeleted: false })
-        .exec();
+      const foundNonDeleted = await personModel.findOne({ _id: person._id, isDeleted: false }).exec();
       expect(foundNonDeleted).toBeNull();
 
       saveSpy.mockRestore();
@@ -129,7 +111,7 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       await person.restore(); // This should now be recognized
 
       expect(person.isDeleted).toBe(false);
-      expect(person.deletedAt).toBeUndefined();
+      expect(person.deletedAt).toBeNull();
       expect(saveSpy).toHaveBeenCalled();
 
       const foundPerson = await personModel.findById(person._id).exec();
@@ -149,30 +131,23 @@ describe('Person Schema (with NestJS Testing Module)', () => {
         passwordHash: 'hashedpassword',
         role: testRole._id,
       };
-      const person = new personModel(personData) as PersonDocument;
+      let person = new personModel(personData) as PersonDocument;
       const savedPerson = await person.save();
 
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
       savedPerson.givenName = 'James';
       const updatedPerson = await savedPerson.save();
 
       // Use toObject({ virtuals: true }) explicitly if default is not set project-wide
-      const personObj = updatedPerson.toObject({
-        virtuals: true,
-      }) as PersonDocument & { dateCreated: Date; dateModified: Date };
+      const personObj = updatedPerson.toObject({ virtuals: true }) as PersonDocument & { dateCreated: Date, dateModified: Date };
+
 
       expect(personObj.dateCreated).toBeInstanceOf(Date);
       expect(personObj.dateModified).toBeInstanceOf(Date);
       // Mongoose might return string from toObject if not properly typed, ensure Date
-      expect(new Date(personObj.dateCreated).getTime()).toEqual(
-        updatedPerson.createdAt.getTime(),
-      );
-      expect(new Date(personObj.dateModified).getTime()).toEqual(
-        updatedPerson.updatedAt.getTime(),
-      );
-      expect(updatedPerson.updatedAt.getTime()).toBeGreaterThan(
-        updatedPerson.createdAt.getTime(),
-      );
+      expect(new Date(personObj.dateCreated).getTime()).toEqual(updatedPerson.createdAt.getTime());
+      expect(new Date(personObj.dateModified).getTime()).toEqual(updatedPerson.updatedAt.getTime());
+      expect(updatedPerson.updatedAt.getTime()).toBeGreaterThan(updatedPerson.createdAt.getTime());
     });
   });
 
@@ -202,14 +177,12 @@ describe('Person Schema (with NestJS Testing Module)', () => {
         role: testRole._id,
       }).save();
 
-      const populatedPersonDoc = await personModel
-        .findById(person._id)
-        .populate<{ role: RoleDocument }>('role')
-        .exec();
+      const populatedPersonDoc = await personModel.findById(person._id).populate<{ role: RoleDocument }>('role').exec();
       expect(populatedPersonDoc).toBeDefined();
       if (!populatedPersonDoc) return;
 
       const personJSON = populatedPersonDoc.toJSON({ virtuals: true });
+      console.log('personJSON.role (populated test):', JSON.stringify(personJSON.role, null, 2));
       const roleAsAny = personJSON.role as any;
 
       expect(roleAsAny).toBeDefined();
@@ -217,9 +190,7 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       // console.log(`Person spec - Populated roleAsAny['@id'] type: ${typeof roleAsAny['@id']}, value: ${roleAsAny['@id']}`);
       // console.log(`Person spec - Expected testRole['@id']: ${testRole['@id']}, testRole._id: ${testRole._id!.toString()}`);
       expect(typeof roleAsAny['@id']).toBe('string'); // Assert it's a string first
-      expect(roleAsAny['@id']).toEqual(
-        testRole['@id'] || testRole._id!.toString(),
-      ); // Compare strings
+      expect(roleAsAny['@id']).toEqual(testRole['@id'] || testRole._id!.toString()); // Compare strings
       expect(roleAsAny.roleName).toEqual(testRole.roleName);
     });
 

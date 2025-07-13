@@ -8,10 +8,7 @@ describe('CreateRoleDto', () => {
     const dto = new CreateRoleDto();
     dto['@id'] = uuidv4();
     dto.roleName = RoleName.ADMIN;
-    dto.permissions = [
-      Permission.MANAGE_USER_ROLES,
-      Permission.MANAGE_BUSINESS_DETAILS,
-    ];
+    dto.permissions = [Permission.MANAGE_USER_ROLES, Permission.MANAGE_BUSINESS_DETAILS];
 
     const errors = await validate(dto);
     expect(errors.length).toBe(0);
@@ -40,9 +37,7 @@ describe('CreateRoleDto', () => {
       dto.roleName = RoleName.ADMIN;
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].constraints?.isUuid).toContain(
-        '@id must be a valid UUID v4',
-      );
+      expect(errors[0].constraints?.isUuid).toContain('@id must be a valid UUID v4');
     });
   });
 
@@ -52,9 +47,7 @@ describe('CreateRoleDto', () => {
       // dto.roleName is not set
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'roleName')?.constraints?.isNotEmpty,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'roleName')?.constraints?.isNotEmpty).toBeDefined();
     });
 
     it('should fail if roleName is not a valid enum value', async () => {
@@ -62,9 +55,7 @@ describe('CreateRoleDto', () => {
       dto.roleName = 'INVALID_ROLENAME' as RoleName;
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'roleName')?.constraints?.isEnum,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'roleName')?.constraints?.isEnum).toBeDefined();
     });
   });
 
@@ -80,16 +71,12 @@ describe('CreateRoleDto', () => {
     it('should fail if permissions contains invalid enum values', async () => {
       const dto = new CreateRoleDto();
       dto.roleName = RoleName.ADMIN;
-      dto.permissions = [
-        Permission.MANAGE_USER_ROLES,
-        'INVALID_PERMISSION' as Permission,
-      ];
+      dto.permissions = [Permission.MANAGE_USER_ROLES, 'INVALID_PERMISSION' as Permission];
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       // console.log(JSON.stringify(errors, null, 2)); // For debugging
-      expect(
-        errors.find((e) => e.property === 'permissions')?.constraints?.isEnum,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'permissions')?.constraints?.isEnum).toBeDefined();
+
     });
 
     it('should pass if permissions is an empty array', async () => {

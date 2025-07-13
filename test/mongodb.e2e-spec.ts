@@ -21,10 +21,10 @@ describe('MongoDB Connection (e2e)', () => {
   });
 
   afterAll(async () => {
-    if (connection !== null && connection !== undefined) {
+    if (connection) {
       await connection.close();
     }
-    if (app !== null && app !== undefined) {
+    if (app) {
       await app.close();
     }
   });

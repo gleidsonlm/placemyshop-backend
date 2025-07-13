@@ -56,9 +56,7 @@ describe('CreatePersonDto', () => {
       dto.roleId = uuidv4();
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].constraints?.isUuid).toContain(
-        '@id must be a valid UUID v4',
-      );
+      expect(errors[0].constraints?.isUuid).toContain('@id must be a valid UUID v4');
     });
   });
 
@@ -71,9 +69,7 @@ describe('CreatePersonDto', () => {
       dto.roleId = uuidv4();
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'givenName')?.constraints?.isNotEmpty,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'givenName')?.constraints?.isNotEmpty).toBeDefined();
     });
   });
 
@@ -86,10 +82,7 @@ describe('CreatePersonDto', () => {
       dto.roleId = uuidv4();
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'familyName')?.constraints
-          ?.isNotEmpty,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'familyName')?.constraints?.isNotEmpty).toBeDefined();
     });
   });
 
@@ -102,9 +95,7 @@ describe('CreatePersonDto', () => {
       dto.roleId = uuidv4();
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'email')?.constraints?.isNotEmpty,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'email')?.constraints?.isNotEmpty).toBeDefined();
     });
 
     it('should fail if email is not a valid email format', async () => {
@@ -116,9 +107,7 @@ describe('CreatePersonDto', () => {
       dto.roleId = uuidv4();
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'email')?.constraints?.isEmail,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'email')?.constraints?.isEmail).toBeDefined();
     });
   });
 
@@ -145,9 +134,7 @@ describe('CreatePersonDto', () => {
       dto.roleId = uuidv4();
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'password')?.constraints?.isNotEmpty,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'password')?.constraints?.isNotEmpty).toBeDefined();
     });
 
     it('should fail if password is less than 8 characters', async () => {
@@ -159,9 +146,7 @@ describe('CreatePersonDto', () => {
       dto.roleId = uuidv4();
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'password')?.constraints?.minLength,
-      ).toContain('Password must be at least 8 characters long');
+      expect(errors.find(e => e.property === 'password')?.constraints?.minLength).toContain('Password must be at least 8 characters long');
     });
   });
 
@@ -174,9 +159,7 @@ describe('CreatePersonDto', () => {
       dto.password = 'password123';
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'roleId')?.constraints?.isNotEmpty,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'roleId')?.constraints?.isNotEmpty).toBeDefined();
     });
   });
 
@@ -191,9 +174,7 @@ describe('CreatePersonDto', () => {
       dto.status = 'INVALID_STATUS' as PersonStatus;
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(
-        errors.find((e) => e.property === 'status')?.constraints?.isEnum,
-      ).toBeDefined();
+      expect(errors.find(e => e.property === 'status')?.constraints?.isEnum).toBeDefined();
     });
   });
 });
