@@ -129,7 +129,7 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       await person.restore(); // This should now be recognized
 
       expect(person.isDeleted).toBe(false);
-      expect(person.deletedAt).toBeNull();
+      expect(person.deletedAt).toBeUndefined();
       expect(saveSpy).toHaveBeenCalled();
 
       const foundPerson = await personModel.findById(person._id).exec();

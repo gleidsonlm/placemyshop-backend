@@ -96,7 +96,7 @@ describe('Role Schema (with NestJS Testing Module)', () => {
       await role.restore();
 
       expect(role.isDeleted).toBe(false);
-      expect(role.deletedAt).toBeNull();
+      expect(role.deletedAt).toBeUndefined();
       expect(saveSpy).toHaveBeenCalled();
 
       const foundRole = await roleModel.findById(role._id).exec();

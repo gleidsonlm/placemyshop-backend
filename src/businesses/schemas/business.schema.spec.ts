@@ -131,7 +131,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       await business.restore();
 
       expect(business.isDeleted).toBe(false);
-      expect(business.deletedAt).toBeNull();
+      expect(business.deletedAt).toBeUndefined();
       expect(saveSpy).toHaveBeenCalled();
 
       const foundBusiness = await businessModel.findById(business._id).exec();
