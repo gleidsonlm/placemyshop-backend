@@ -102,7 +102,7 @@ export class AuthService {
         payload.sub,
       );
 
-      if (!user) {
+      if (user === null) {
         throw new UnauthorizedException('User not found');
       }
 

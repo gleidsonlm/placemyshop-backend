@@ -53,10 +53,12 @@ describe('AuthController', () => {
 
   describe('login', () => {
     it('should return login response with tokens', async () => {
-      const request = { user: mockUser } as any; // Cast to any for testing
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const request = { user: mockUser } as any;
 
       mockAuthService.login.mockResolvedValue(mockLoginResponse);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const result = await controller.login(request);
 
       expect(mockAuthService.login).toHaveBeenCalledWith(mockUser);
@@ -94,8 +96,10 @@ describe('AuthController', () => {
 
   describe('getProfile', () => {
     it('should return user profile', () => {
-      const request = { user: mockUser } as any; // Cast to any for testing
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const request = { user: mockUser } as any;
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const result = controller.getProfile(request);
 
       expect(result).toEqual(mockUser);
