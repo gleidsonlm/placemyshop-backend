@@ -90,7 +90,7 @@ export class UsersService {
 
     const person = await this.personModel.findById(id).populate('role').exec();
 
-    if (!person || person.isDeleted) {
+    if (person === null || person.isDeleted === true) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
 
@@ -119,13 +119,13 @@ export class UsersService {
       role?: string;
     } = { ...baseUpdateData };
 
-    if (password) {
+    if (password !== undefined && password !== null && password !== '') {
       const saltRounds = 12;
       updateData.passwordHash = await bcrypt.hash(password, saltRounds);
     }
 
     // If roleId is provided, map it to role field
-    if (roleId) {
+    if (roleId !== undefined && roleId !== null && roleId !== '') {
       updateData.role = roleId;
     }
 
@@ -134,7 +134,7 @@ export class UsersService {
       .populate('role')
       .exec();
 
-    if (!updatedPerson || updatedPerson.isDeleted) {
+    if (updatedPerson === null || updatedPerson.isDeleted === true) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
 
@@ -147,7 +147,7 @@ export class UsersService {
 
     const person = await this.personModel.findById(id).exec();
 
-    if (!person || person.isDeleted) {
+    if (person === null || person.isDeleted === true) {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
 
@@ -166,7 +166,7 @@ export class UsersService {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
 
-    if (!person.isDeleted) {
+    if (person.isDeleted !== true) {
       this.logger.warn(`Person with id ${id} is not deleted, no action needed`);
       return person;
     }

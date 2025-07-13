@@ -75,12 +75,6 @@ describe('UpdateBusinessDto', () => {
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
       const sameAsError = errors.find((e) => e.property === 'sameAs');
-      if (sameAsError) {
-        console.log(
-          'UpdateBusinessDto sameAsError structure:',
-          JSON.stringify(sameAsError, null, 2),
-        );
-      }
       expect(sameAsError).toBeDefined();
       expect(sameAsError?.constraints?.isUrl).toContain(
         'each value in sameAs must be a URL address',

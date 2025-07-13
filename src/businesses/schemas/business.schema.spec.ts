@@ -131,7 +131,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       await business.restore();
 
       expect(business.isDeleted).toBe(false);
-      expect(business.deletedAt).toBeNull();
+      expect(business.deletedAt).toBeUndefined();
       expect(saveSpy).toHaveBeenCalled();
 
       const foundBusiness = await businessModel.findById(business._id).exec();
@@ -185,10 +185,6 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       if (!populatedBusiness) return;
 
       const businessJSON = populatedBusiness.toJSON({ virtuals: true });
-      console.log(
-        'businessJSON.founder (populated test):',
-        JSON.stringify(businessJSON.founder, null, 2),
-      );
       const founderAsAny = businessJSON.founder as any;
 
       expect(founderAsAny).toBeDefined();

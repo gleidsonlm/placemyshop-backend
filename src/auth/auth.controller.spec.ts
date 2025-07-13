@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { RoleName, Permission } from '../roles/schemas/role.schema';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -13,7 +14,11 @@ describe('AuthController', () => {
     familyName: 'Doe',
     role: {
       '@id': 'role-uuid-456',
-      roleName: 'Manager',
+      roleName: RoleName.MANAGER,
+      permissions: [
+        Permission.MANAGE_CUSTOMERS_MANAGER,
+        Permission.ACCESS_CUSTOMER_CHAT_FULL_MANAGER,
+      ],
     },
   };
 
@@ -48,10 +53,12 @@ describe('AuthController', () => {
 
   describe('login', () => {
     it('should return login response with tokens', async () => {
-      const request = { user: mockUser };
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const request = { user: mockUser } as any;
 
       mockAuthService.login.mockResolvedValue(mockLoginResponse);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const result = await controller.login(request);
 
       expect(mockAuthService.login).toHaveBeenCalledWith(mockUser);
@@ -89,8 +96,10 @@ describe('AuthController', () => {
 
   describe('getProfile', () => {
     it('should return user profile', () => {
-      const request = { user: mockUser };
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const request = { user: mockUser } as any;
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const result = controller.getProfile(request);
 
       expect(result).toEqual(mockUser);

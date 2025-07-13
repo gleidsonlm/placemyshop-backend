@@ -102,14 +102,13 @@ BusinessSchema.set('toJSON', {
   virtuals: true,
   getters: true,
   /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/strict-boolean-expressions */
   transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org';
     // '@type' is already handled by a direct Prop default: 'LocalBusiness'
     // but ensure it's present in the final 'ret' object
-    if (!ret['@type']) {
-      ret['@type'] =
-        (doc as unknown as Record<string, unknown>)['@type'] || 'LocalBusiness';
-    }
+    ret['@type'] ??=
+      (doc as unknown as Record<string, unknown>)['@type'] ?? 'LocalBusiness';
 
     // Ensure the main document's @id is correctly set
     if (
@@ -194,6 +193,7 @@ BusinessSchema.set('toJSON', {
     // delete ret._id;
     return ret;
   },
+  /* eslint-enable @typescript-eslint/strict-boolean-expressions */
 });
 BusinessSchema.set('toObject', { virtuals: true, getters: true });
 

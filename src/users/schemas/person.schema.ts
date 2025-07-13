@@ -86,7 +86,7 @@ PersonSchema.virtual('dateModified').get(function (this: PersonDocument) {
 // Ensure virtuals are included in toJSON and toObject outputs
 PersonSchema.set('toJSON', {
   virtuals: true,
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
   transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org';
     ret['@type'] = 'Person';

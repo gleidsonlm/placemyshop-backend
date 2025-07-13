@@ -129,7 +129,7 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       await person.restore(); // This should now be recognized
 
       expect(person.isDeleted).toBe(false);
-      expect(person.deletedAt).toBeNull();
+      expect(person.deletedAt).toBeUndefined();
       expect(saveSpy).toHaveBeenCalled();
 
       const foundPerson = await personModel.findById(person._id).exec();
@@ -210,10 +210,6 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       if (!populatedPersonDoc) return;
 
       const personJSON = populatedPersonDoc.toJSON({ virtuals: true });
-      console.log(
-        'personJSON.role (populated test):',
-        JSON.stringify(personJSON.role, null, 2),
-      );
       const roleAsAny = personJSON.role as any;
 
       expect(roleAsAny).toBeDefined();

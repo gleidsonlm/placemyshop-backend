@@ -44,14 +44,24 @@ export class AuthService {
     const user: PersonDocument | null =
       await this.usersService.validatePassword(email, password);
     if (user) {
-      // Return user without password hash
-      return {
-        '@id': user['@id'],
-        email: user.email,
-        givenName: user.givenName,
-        familyName: user.familyName,
-        role: user.role,
-      };
+      // Ensure role is populated (it should be from validatePassword)
+      if (
+        typeof user.role === 'object' &&
+        user.role !== null &&
+        '@id' in user.role
+      ) {
+        // Return user without password hash
+        return {
+          '@id': user['@id'],
+          email: user.email,
+          givenName: user.givenName,
+          familyName: user.familyName,
+          role: user.role,
+        };
+      } else {
+        this.logger.error('User role is not populated properly');
+        return null;
+      }
     }
     return null;
   }
@@ -92,7 +102,7 @@ export class AuthService {
         payload.sub,
       );
 
-      if (!user) {
+      if (user === null) {
         throw new UnauthorizedException('User not found');
       }
 

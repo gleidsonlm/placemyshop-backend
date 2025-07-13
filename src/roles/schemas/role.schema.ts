@@ -72,7 +72,7 @@ RoleSchema.virtual('dateModified').get(function (this: RoleDocument) {
 
 RoleSchema.set('toJSON', {
   virtuals: true,
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
   transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org'; // Or appropriate context if not schema.org
     ret['@type'] = 'Role';
