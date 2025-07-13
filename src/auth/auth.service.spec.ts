@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { RoleName, Permission } from '../roles/schemas/role.schema';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -14,8 +15,11 @@ describe('AuthService', () => {
     email: 'john.doe@example.com',
     role: {
       '@id': 'role-uuid-456',
-      roleName: 'Manager',
-      permissions: ['customers.manage_manager'],
+      roleName: RoleName.MANAGER,
+      permissions: [
+        Permission.MANAGE_CUSTOMERS_MANAGER,
+        Permission.ACCESS_CUSTOMER_CHAT_FULL_MANAGER,
+      ],
     },
     status: 'Active',
   };

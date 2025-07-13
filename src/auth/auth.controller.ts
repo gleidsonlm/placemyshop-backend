@@ -22,17 +22,10 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshTokenDto, LoginDto } from './dto/auth.dto';
 
+import { UserPayload } from './auth.service';
+
 interface AuthenticatedRequest extends Request {
-  user: {
-    '@id': string;
-    email: string;
-    givenName: string;
-    familyName: string;
-    role: {
-      '@id': string;
-      roleName: string;
-    };
-  };
+  user: UserPayload;
 }
 
 @ApiTags('auth')
