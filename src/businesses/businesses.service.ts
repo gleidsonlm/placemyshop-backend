@@ -68,7 +68,7 @@ export class BusinessesService {
       .populate('founder')
       .exec();
 
-    if (!business || business.isDeleted) {
+    if (business === null || business.isDeleted === true) {
       throw new NotFoundException(`Business with id ${id} not found`);
     }
 
@@ -98,7 +98,7 @@ export class BusinessesService {
       .populate('founder')
       .exec();
 
-    if (!updatedBusiness || updatedBusiness.isDeleted) {
+    if (updatedBusiness === null || updatedBusiness.isDeleted === true) {
       throw new NotFoundException(`Business with id ${id} not found`);
     }
 
@@ -111,7 +111,7 @@ export class BusinessesService {
 
     const business = await this.businessModel.findById(id);
 
-    if (!business || business.isDeleted) {
+    if (business === null || business.isDeleted === true) {
       throw new NotFoundException(`Business with id ${id} not found`);
     }
 
@@ -130,7 +130,7 @@ export class BusinessesService {
       throw new NotFoundException(`Business with id ${id} not found`);
     }
 
-    if (!business.isDeleted) {
+    if (business.isDeleted !== true) {
       this.logger.warn(
         `Business with id ${id} is not deleted, no action needed`,
       );

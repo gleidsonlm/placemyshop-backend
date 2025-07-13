@@ -52,7 +52,7 @@ export class RolesService {
 
     const role = await this.roleModel.findById(id);
 
-    if (!role || role.isDeleted) {
+    if (role === null || role.isDeleted === true) {
       throw new NotFoundException(`Role with id ${id} not found`);
     }
 
@@ -74,7 +74,10 @@ export class RolesService {
     this.logger.log(`Updating role with id: ${id}`);
 
     // Check if role name already exists (if roleName is being updated)
-    if (updateRoleDto.roleName) {
+    if (
+      updateRoleDto.roleName !== undefined &&
+      updateRoleDto.roleName !== null
+    ) {
       const existingRole = await this.roleModel.findOne({
         roleName: updateRoleDto.roleName,
         _id: { $ne: id },
@@ -88,7 +91,7 @@ export class RolesService {
       .findByIdAndUpdate(id, updateRoleDto, { new: true, runValidators: true })
       .exec();
 
-    if (!updatedRole || updatedRole.isDeleted) {
+    if (updatedRole === null || updatedRole.isDeleted === true) {
       throw new NotFoundException(`Role with id ${id} not found`);
     }
 
@@ -101,7 +104,7 @@ export class RolesService {
 
     const role = await this.roleModel.findById(id);
 
-    if (!role || role.isDeleted) {
+    if (role === null || role.isDeleted === true) {
       throw new NotFoundException(`Role with id ${id} not found`);
     }
 
@@ -120,7 +123,7 @@ export class RolesService {
       throw new NotFoundException(`Role with id ${id} not found`);
     }
 
-    if (!role.isDeleted) {
+    if (role.isDeleted !== true) {
       this.logger.warn(`Role with id ${id} is not deleted, no action needed`);
       return role;
     }
