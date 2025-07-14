@@ -234,6 +234,7 @@ The PlaceMyShop Backend provides a comprehensive REST API for managing users, ro
 - **Comprehensive validation** and error handling
 - **Pagination** support for list endpoints
 - **Soft delete** functionality with restore capabilities
+- **In-memory caching** for frequently accessed data
 - **RESTful API design** following best practices
 - **Interactive API documentation** with Swagger/OpenAPI
 

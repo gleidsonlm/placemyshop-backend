@@ -44,6 +44,8 @@ AI coding agents are responsible for extending or updating documentation as feat
 - **Schema Documentation:** When adding or modifying data entities, the schema documentation (e.g., in `docs/SCHEMA.md`) must be updated to reflect these changes. This includes updating JSON-LD examples and descriptions.
 - **Code Comments:** Generated code should be well-commented, explaining complex logic or non-obvious decisions.
 
+- **Caching:** When implementing caching, ensure that the cache is invalidated when data is updated or deleted.
+
 ## Commit Messages and Documentation Updates Example
 
 Agents should follow a clear and objective style for commit messages and documentation updates.

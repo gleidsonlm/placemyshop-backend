@@ -1,9 +1,10 @@
-import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import {
   Injectable,
   ConflictException,
   NotFoundException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,6 +15,7 @@ import {
 } from './schemas/role.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class RolesService {
@@ -21,6 +23,7 @@ export class RolesService {
 
   constructor(
     @InjectModel(Role.name) private readonly roleModel: Model<RoleDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async create(createRoleDto: CreateRoleDto): Promise<RoleDocument> {
@@ -48,6 +51,9 @@ export class RolesService {
     const createdRole = await this.roleModel.create(roleData);
     this.logger.log(`Successfully created role with id: ${createdRole['@id']}`);
 
+    // Invalidate cache
+    await this.cacheManager.del('allRoles');
+
     return createdRole;
   }
 
@@ -65,6 +71,8 @@ export class RolesService {
       .exec();
   }
 
+  @CacheKey('role_:id')
+  @CacheTTL(60)
   async findOne(id: string): Promise<RoleDocument> {
     this.logger.log(`Finding role with id: ${id}`);
 
@@ -77,6 +85,8 @@ export class RolesService {
     return role;
   }
 
+  @CacheKey('role_name_:roleName')
+  @CacheTTL(60)
   async findByName(roleName: string): Promise<RoleDocument | null> {
     this.logger.log(`Finding role with name: ${roleName}`);
 
@@ -113,6 +123,13 @@ export class RolesService {
       throw new NotFoundException(`Role with id ${id} not found`);
     }
 
+    // Invalidate cache
+    await this.cacheManager.del('allRoles');
+    await this.cacheManager.del(`role_${id}`);
+    if (updateRoleDto.roleName) {
+      await this.cacheManager.del(`role_name_${updateRoleDto.roleName}`);
+    }
+
     this.logger.log(`Successfully updated role with id: ${id}`);
     return updatedRole;
   }
@@ -128,6 +145,11 @@ export class RolesService {
 
     const deletedRole = await role.softDelete();
     this.logger.log(`Successfully soft deleted role with id: ${id}`);
+
+    // Invalidate cache
+    await this.cacheManager.del('allRoles');
+    await this.cacheManager.del(`role_${id}`);
+    await this.cacheManager.del(`role_name_${role.roleName}`);
 
     return deletedRole;
   }

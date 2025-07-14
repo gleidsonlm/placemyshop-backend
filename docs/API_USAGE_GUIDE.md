@@ -573,6 +573,7 @@ docker-compose logs app  # If using Docker
    ```
 
 2. **Cache frequently used data** (roles, etc.)
+   - The API uses in-memory caching for `findAll` endpoints to improve performance.
 
 3. **Use compression for large responses**:
    ```bash

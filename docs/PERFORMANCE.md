@@ -48,22 +48,19 @@ The services use `populate` to fetch related documents, which is convenient but 
 
 ## 3. Caching
 
-Caching is not currently implemented, but it can provide a significant performance boost for frequently accessed data.
+In-memory caching has been implemented for the `findAll` methods in the `UsersService`, `RolesService`, and `BusinessesService`. This provides a performance boost for frequently accessed list endpoints.
 
-### Recommendations:
+### Current Implementation:
 
-- **Cache-Aside Strategy:**
-  - Implement a cache-aside strategy using a caching solution like Redis.
-  - When a request for data comes in, first check the cache. If the data is in the cache, return it.
-  - If the data is not in the cache, fetch it from the database, store it in the cache, and then return it.
+- **In-Memory Cache:** The application uses the `cache-manager` package with an in-memory store.
+- **Global Cache Module:** The `CacheModule` is registered globally, making it available throughout the application.
+- **Auto-Caching:** The `@CacheKey` and `@CacheTTL` decorators are used to automatically cache the responses of the `findAll` methods for 60 seconds.
 
-- **What to Cache:**
-  - **Roles and Permissions:** Roles and their permissions are unlikely to change frequently, making them ideal candidates for caching.
-  - **User Sessions:** Cache user session data to reduce database lookups for authentication and authorization.
-  - **Frequently Read Businesses:** Cache data for businesses that are frequently viewed.
+### Recommendations for Future Improvement:
 
-- **Cache Invalidation:**
-  - When data is updated or deleted, the corresponding cache entries must be invalidated. This can be done in the `update` and `remove` methods of the services.
+- **Distributed Cache:** For a production environment with multiple application instances, replace the in-memory cache with a distributed cache like Redis. This will ensure cache consistency across all instances.
+- **Cache Invalidation:** Implement a cache invalidation strategy. When a user, role, or business is created, updated, or deleted, the corresponding cache entries should be invalidated. This can be done using the `@CacheEvict` decorator or by injecting the `Cache` object and calling `cache.del()`.
+- **Selective Caching:** For more granular control, consider implementing caching on other frequently accessed, read-only endpoints, such as `findOne` or `findByEmail`.
 
 ## 4. Data Growth and Scalability
 
