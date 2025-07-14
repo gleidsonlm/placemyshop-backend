@@ -1,3 +1,4 @@
+import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import {
   Injectable,
   ConflictException,
@@ -50,6 +51,8 @@ export class RolesService {
     return createdRole;
   }
 
+  @CacheKey('allRoles')
+  @CacheTTL(60)
   async findAll(page: number = 1, limit: number = 10): Promise<RoleDocument[]> {
     this.logger.log(`Finding all roles - page: ${page}, limit: ${limit}`);
 

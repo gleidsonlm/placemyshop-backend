@@ -1,3 +1,4 @@
+import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import {
   Injectable,
   ConflictException,
@@ -69,6 +70,8 @@ export class UsersService {
     return populatedPerson;
   }
 
+  @CacheKey('allUsers')
+  @CacheTTL(60)
   async findAll(
     page: number = 1,
     limit: number = 10,

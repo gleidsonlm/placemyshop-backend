@@ -1,3 +1,4 @@
+import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import {
   Injectable,
   NotFoundException,
@@ -67,6 +68,8 @@ export class BusinessesService {
     return populatedBusiness;
   }
 
+  @CacheKey('allBusinesses')
+  @CacheTTL(60)
   async findAll(
     page: number = 1,
     limit: number = 10,
