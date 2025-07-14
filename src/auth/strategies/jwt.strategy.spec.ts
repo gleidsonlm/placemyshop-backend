@@ -17,7 +17,7 @@ const mockAuthService = {
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
-  let authService: AuthService;
+  // let authService: AuthService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

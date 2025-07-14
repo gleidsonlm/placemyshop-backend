@@ -6,13 +6,13 @@ This document outlines performance considerations for the data schema and servic
 
 The current schema implementation includes several indexes that are beneficial for performance. However, there are opportunities for further optimization.
 
-### Current Indexes:
+### Current Indexes
 
 - **Person:** `email`, `status`, `isDeleted`, `role`, `@id`
 - **Role:** `roleName`, `isDeleted`, `@id`
 - **Business:** `name`, `email`, `founder`, `isDeleted`, `@id`
 
-### Recommendations:
+### Indexing Recommendations
 
 - **Compound Indexes:**
   - For the `Person` schema, the compound index `{ isDeleted: 1, email: 1 }` is effective for ensuring uniqueness of email for non-deleted users. A similar index on `{ isDeleted: 1, '@id': 1 }` is also good.
@@ -29,7 +29,7 @@ The current schema implementation includes several indexes that are beneficial f
 
 The services use `populate` to fetch related documents, which is convenient but can lead to performance issues if not used carefully.
 
-### Recommendations:
+### Query Optimization Recommendations
 
 - **Selective Population:**
   - When populating related documents, select only the necessary fields. For example, when populating the `role` in the `Person` schema, you might only need the `roleName` and `permissions`, not the entire `Role` document.
@@ -50,13 +50,13 @@ The services use `populate` to fetch related documents, which is convenient but 
 
 In-memory caching has been implemented for the `findAll` methods in the `UsersService`, `RolesService`, and `BusinessesService`. This provides a performance boost for frequently accessed list endpoints.
 
-### Current Implementation:
+### Current Implementation
 
 - **In-Memory Cache:** The application uses the `cache-manager` package with an in-memory store.
 - **Global Cache Module:** The `CacheModule` is registered globally, making it available throughout the application.
 - **Auto-Caching:** The `@CacheKey` and `@CacheTTL` decorators are used to automatically cache the responses of the `findAll` methods for 60 seconds.
 
-### Recommendations for Future Improvement:
+### Recommendations for Future Improvement
 
 - **Distributed Cache:** For a production environment with multiple application instances, replace the in-memory cache with a distributed cache like Redis. This will ensure cache consistency across all instances.
 - **Cache Invalidation:** Implement a cache invalidation strategy. When a user, role, or business is created, updated, or deleted, the corresponding cache entries should be invalidated. This can be done using the `@CacheEvict` decorator or by injecting the `Cache` object and calling `cache.del()`.
@@ -66,7 +66,7 @@ In-memory caching has been implemented for the `findAll` methods in the `UsersSe
 
 As the application grows, the amount of data will increase. It's important to have a plan for managing this growth.
 
-### Recommendations:
+### Data Growth and Scalability Recommendations
 
 - **Database Sharding:**
   - If the database becomes a bottleneck, consider sharding the database. MongoDB has built-in support for sharding.
