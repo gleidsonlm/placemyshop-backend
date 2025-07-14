@@ -130,13 +130,13 @@ export class UsersService {
       role?: string;
     } = { ...baseUpdateData };
 
-    if (password !== null && password !== undefined) {
+    if (password !== null && password !== undefined && password !== '') {
       const saltRounds = 12;
       updateData.passwordHash = await bcrypt.hash(password, saltRounds);
     }
 
     // If roleId is provided, map it to role field
-    if (roleId !== null && roleId !== undefined) {
+    if (roleId !== null && roleId !== undefined && roleId !== '') {
       updateData.role = roleId;
     }
 

@@ -42,7 +42,8 @@ export class BusinessesService {
 
     // Map founderId to founder field
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { founderId, ...businessDataWithoutFounderId } = createBusinessDto;
+    const { founderId: _founderId, ...businessDataWithoutFounderId } =
+      createBusinessDto;
     const businessData = {
       ...businessDataWithoutFounderId,
       founder: founder._id, // Use the ObjectId of the found user

@@ -36,13 +36,15 @@ export class RolesService {
     }
 
     // If permissions are not provided, assign default permissions based on role name
+    let roleData = { ...createRoleDto };
     if (!createRoleDto.permissions || createRoleDto.permissions.length === 0) {
-      createRoleDto.permissions = getDefaultPermissionsForRole(
+      const defaultPermissions = getDefaultPermissionsForRole(
         createRoleDto.roleName,
       );
+      roleData = { ...createRoleDto, permissions: defaultPermissions };
     }
 
-    const createdRole = await this.roleModel.create(createRoleDto);
+    const createdRole = await this.roleModel.create(roleData);
     this.logger.log(`Successfully created role with id: ${createdRole['@id']}`);
 
     return createdRole;
