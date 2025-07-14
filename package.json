@@ -78,7 +78,10 @@
   },
   "trustedDependencies": [
     "@nestjs/core",
+    "@scarf/scarf",
     "@swc/core",
+    "bcrypt",
+    "mongodb-memory-server",
     "unrs-resolver"
   ]
 }
