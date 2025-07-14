@@ -6,7 +6,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Role, RoleDocument } from './schemas/role.schema';
+import {
+  Role,
+  RoleDocument,
+  getDefaultPermissionsForRole,
+} from './schemas/role.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 
@@ -26,7 +30,16 @@ export class RolesService {
       roleName: createRoleDto.roleName,
     });
     if (existingRole) {
-      throw new ConflictException('Role name already exists');
+      throw new ConflictException(
+        `Role with name '${createRoleDto.roleName}' already exists.`,
+      );
+    }
+
+    // If permissions are not provided, assign default permissions based on role name
+    if (!createRoleDto.permissions || createRoleDto.permissions.length === 0) {
+      createRoleDto.permissions = getDefaultPermissionsForRole(
+        createRoleDto.roleName,
+      );
     }
 
     const createdRole = await this.roleModel.create(createRoleDto);

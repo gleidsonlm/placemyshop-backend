@@ -2,9 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { BusinessesService } from './businesses.service';
 import { Business } from './schemas/business.schema';
+import { Person } from '../users/schemas/person.schema';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('BusinessesService', () => {
   let service: BusinessesService;
@@ -31,6 +32,10 @@ describe('BusinessesService', () => {
     exec: jest.fn(),
   };
 
+  const mockPersonModel = {
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -38,6 +43,10 @@ describe('BusinessesService', () => {
         {
           provide: getModelToken(Business.name),
           useValue: mockBusinessModel,
+        },
+        {
+          provide: getModelToken(Person.name),
+          useValue: mockPersonModel,
         },
       ],
     }).compile();
@@ -55,6 +64,11 @@ describe('BusinessesService', () => {
         name: 'Test Business',
         founderId: 'person-uuid-456',
       };
+      const founder = { _id: 'founder-object-id' };
+
+      mockPersonModel.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(founder),
+      });
 
       const createdBusiness = { ...mockBusiness, _id: 'mock-object-id' };
       const mockQuery = {
@@ -72,6 +86,21 @@ describe('BusinessesService', () => {
         createdBusiness._id,
       );
       expect(result).toEqual(mockBusiness);
+    });
+
+    it('should throw BadRequestException if founder does not exist', async () => {
+      const createBusinessDto: CreateBusinessDto = {
+        name: 'Test Business',
+        founderId: 'nonexistent-founder',
+      };
+
+      mockPersonModel.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      await expect(service.create(createBusinessDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 

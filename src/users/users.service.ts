@@ -112,6 +112,17 @@ export class UsersService {
   ): Promise<PersonDocument> {
     this.logger.log(`Updating person with id: ${id}`);
 
+    // If email is being updated, check for conflicts
+    if (updatePersonDto.email !== null && updatePersonDto.email !== undefined) {
+      const existingPerson = await this.personModel.findOne({
+        email: updatePersonDto.email,
+        _id: { $ne: id },
+      });
+      if (existingPerson) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
     // If password is being updated, hash it
     const { password, roleId, ...baseUpdateData } = updatePersonDto;
     const updateData: typeof baseUpdateData & {
@@ -119,13 +130,13 @@ export class UsersService {
       role?: string;
     } = { ...baseUpdateData };
 
-    if (password !== undefined && password !== null && password !== '') {
+    if (password !== null && password !== undefined) {
       const saltRounds = 12;
       updateData.passwordHash = await bcrypt.hash(password, saltRounds);
     }
 
     // If roleId is provided, map it to role field
-    if (roleId !== undefined && roleId !== null && roleId !== '') {
+    if (roleId !== null && roleId !== undefined) {
       updateData.role = roleId;
     }
 
