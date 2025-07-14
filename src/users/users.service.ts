@@ -1,8 +1,10 @@
+import { CACHE_MANAGER, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import {
   Injectable,
   ConflictException,
   NotFoundException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -10,6 +12,7 @@ import { Person, PersonDocument } from './schemas/person.schema';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import * as bcrypt from 'bcrypt';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +21,7 @@ export class UsersService {
   constructor(
     @InjectModel(Person.name)
     private readonly personModel: Model<PersonDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async create(createPersonDto: CreatePersonDto): Promise<PersonDocument> {
@@ -56,6 +60,9 @@ export class UsersService {
       `Successfully created person with id: ${createdPerson['@id']}`,
     );
 
+    // Invalidate cache
+    await this.cacheManager.del('allUsers');
+
     // Return populated person
     const populatedPerson = await this.personModel
       .findById(createdPerson._id)
@@ -69,6 +76,8 @@ export class UsersService {
     return populatedPerson;
   }
 
+  @CacheKey('allUsers')
+  @CacheTTL(60)
   async findAll(
     page: number = 1,
     limit: number = 10,
@@ -85,6 +94,8 @@ export class UsersService {
       .exec();
   }
 
+  @CacheKey('user_:id')
+  @CacheTTL(60)
   async findOne(id: string): Promise<PersonDocument> {
     this.logger.log(`Finding person with id: ${id}`);
 
@@ -97,6 +108,8 @@ export class UsersService {
     return person;
   }
 
+  @CacheKey('user_email_:email')
+  @CacheTTL(60)
   async findByEmail(email: string): Promise<PersonDocument | null> {
     this.logger.log(`Finding person with email: ${email}`);
 
@@ -149,6 +162,13 @@ export class UsersService {
       throw new NotFoundException(`Person with id ${id} not found`);
     }
 
+    // Invalidate cache
+    await this.cacheManager.del('allUsers');
+    await this.cacheManager.del(`user_${id}`);
+    if (updatePersonDto.email !== undefined) {
+      await this.cacheManager.del(`user_email_${updatePersonDto.email}`);
+    }
+
     this.logger.log(`Successfully updated person with id: ${id}`);
     return updatedPerson;
   }
@@ -164,6 +184,11 @@ export class UsersService {
 
     const deletedPerson = await person.softDelete();
     this.logger.log(`Successfully soft deleted person with id: ${id}`);
+
+    // Invalidate cache
+    await this.cacheManager.del('allUsers');
+    await this.cacheManager.del(`user_${id}`);
+    await this.cacheManager.del(`user_email_${person.email}`);
 
     return deletedPerson;
   }

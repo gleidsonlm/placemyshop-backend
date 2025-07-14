@@ -24,8 +24,9 @@ This guide provides practical examples and workflows for using the PlaceMyShop B
 ### Interactive Documentation
 
 Visit the Swagger UI for interactive API documentation:
-- **Local**: http://localhost:3000/api/docs
-- **Features**: 
+
+- **Local**: <http://localhost:3000/api/docs>
+- **Features**:
   - Interactive testing
   - Complete schema documentation
   - Authentication testing
@@ -53,6 +54,7 @@ curl -X POST http://localhost:3000/auth/login \
 ```
 
 **Response:**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -73,6 +75,7 @@ curl -X POST http://localhost:3000/auth/login \
 ### Step 2: Save and Use Access Token
 
 Export the token for subsequent requests:
+
 ```bash
 # Extract token from login response and export
 export ACCESS_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -446,6 +449,7 @@ curl -X POST http://localhost:3000/users \
 ```
 
 **Response:**
+
 ```json
 {
   "statusCode": 400,
@@ -463,6 +467,7 @@ curl -X POST http://localhost:3000/users \
 ### Common Issues
 
 #### 1. "Unauthorized" Error
+
 ```bash
 # Check if token is valid
 curl -X GET http://localhost:3000/auth/profile \
@@ -475,6 +480,7 @@ curl -X POST http://localhost:3000/auth/login \
 ```
 
 #### 2. "Not Found" Error
+
 ```bash
 # Verify the resource exists
 curl -X GET http://localhost:3000/users \
@@ -485,6 +491,7 @@ echo "User ID: user-uuid-123"  # Should be a valid UUID or ObjectId
 ```
 
 #### 3. "Conflict" Error (Email exists)
+
 ```bash
 # Try a different email
 curl -X POST http://localhost:3000/users \
@@ -500,6 +507,7 @@ curl -X POST http://localhost:3000/users \
 ```
 
 #### 4. Connection Refused
+
 ```bash
 # Check if server is running
 curl -f http://localhost:3000 || echo "Server not running"
@@ -512,24 +520,28 @@ docker-compose logs app  # If using Docker
 ### Debugging Tips
 
 1. **Use verbose cURL output**:
+
    ```bash
    curl -v -X GET http://localhost:3000/auth/profile \
      -H "Authorization: Bearer $ACCESS_TOKEN"
    ```
 
 2. **Pretty print JSON responses**:
+
    ```bash
    curl -X GET http://localhost:3000/users \
      -H "Authorization: Bearer $ACCESS_TOKEN" | jq '.'
    ```
 
 3. **Save responses for debugging**:
+
    ```bash
    curl -X GET http://localhost:3000/users \
      -H "Authorization: Bearer $ACCESS_TOKEN" > response.json
    ```
 
 4. **Test without authentication first**:
+
    ```bash
    # These endpoints don't require authentication
    curl -X POST http://localhost:3000/auth/login \
@@ -544,6 +556,7 @@ docker-compose logs app  # If using Docker
 1. **Always use HTTPS in production**
 2. **Store tokens securely** (not in scripts or logs)
 3. **Use environment variables for sensitive data**:
+
    ```bash
    export API_BASE_URL="https://api.yourapp.com"
    export ADMIN_EMAIL="admin@yourapp.com"
@@ -551,6 +564,7 @@ docker-compose logs app  # If using Docker
    ```
 
 4. **Implement token refresh logic**:
+
    ```bash
    refresh_token_if_needed() {
      if ! curl -s -f -X GET $API_BASE_URL/auth/profile \
@@ -567,14 +581,17 @@ docker-compose logs app  # If using Docker
 ### Performance
 
 1. **Use pagination for large datasets**:
+
    ```bash
    curl -X GET "http://localhost:3000/users?page=1&limit=50" \
      -H "Authorization: Bearer $ACCESS_TOKEN"
    ```
 
 2. **Cache frequently used data** (roles, etc.)
+   - The API uses in-memory caching for `findAll` endpoints to improve performance.
 
 3. **Use compression for large responses**:
+
    ```bash
    curl -H "Accept-Encoding: gzip" -X GET http://localhost:3000/users \
      -H "Authorization: Bearer $ACCESS_TOKEN"
@@ -582,10 +599,11 @@ docker-compose logs app  # If using Docker
 
 ### Development
 
-1. **Use the Swagger UI for testing**: http://localhost:3000/api/docs
+1. **Use the Swagger UI for testing**: <http://localhost:3000/api/docs>
 2. **Create reusable scripts** for common operations
 3. **Use meaningful variable names** in scripts
 4. **Add error checking** to scripts:
+
    ```bash
    response=$(curl -s -w "%{http_code}" -X GET http://localhost:3000/users \
      -H "Authorization: Bearer $ACCESS_TOKEN")
@@ -614,7 +632,7 @@ docker-compose logs app  # If using Docker
 
 ## Additional Resources
 
-- **Interactive API Documentation**: http://localhost:3000/api/docs
+- **Interactive API Documentation**: <http://localhost:3000/api/docs>
 - **Main Project README**: [README.md](../README.md)
 - **Schema Documentation**: [SCHEMA.md](./SCHEMA.md)
 - **AI Agent Guidelines**: [AGENTS.md](../AGENTS.md)
@@ -623,6 +641,7 @@ docker-compose logs app  # If using Docker
 ## Support
 
 For issues or questions:
+
 1. Check the Swagger documentation at `/api/docs`
 2. Review the troubleshooting section above
 3. Check application logs for detailed error messages

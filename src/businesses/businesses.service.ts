@@ -1,8 +1,10 @@
+import { CACHE_MANAGER, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import {
   Injectable,
   NotFoundException,
   Logger,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -10,6 +12,7 @@ import { Business, BusinessDocument } from './schemas/business.schema';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
 import { Person, PersonDocument } from '../users/schemas/person.schema';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class BusinessesService {
@@ -20,6 +23,7 @@ export class BusinessesService {
     private readonly businessModel: Model<BusinessDocument>,
     @InjectModel(Person.name)
     private readonly personModel: Model<PersonDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async create(
@@ -54,6 +58,9 @@ export class BusinessesService {
       `Successfully created business with id: ${createdBusiness['@id']}`,
     );
 
+    // Invalidate cache
+    await this.cacheManager.del('allBusinesses');
+
     // Return populated business
     const populatedBusiness = await this.businessModel
       .findById(createdBusiness._id)
@@ -67,6 +74,8 @@ export class BusinessesService {
     return populatedBusiness;
   }
 
+  @CacheKey('allBusinesses')
+  @CacheTTL(60)
   async findAll(
     page: number = 1,
     limit: number = 10,
@@ -83,6 +92,8 @@ export class BusinessesService {
       .exec();
   }
 
+  @CacheKey('business_:id')
+  @CacheTTL(60)
   async findOne(id: string): Promise<BusinessDocument> {
     this.logger.log(`Finding business with id: ${id}`);
 
@@ -98,6 +109,8 @@ export class BusinessesService {
     return business;
   }
 
+  @CacheKey('business_founder_:founderId')
+  @CacheTTL(60)
   async findByFounder(founderId: string): Promise<BusinessDocument[]> {
     this.logger.log(`Finding businesses by founder id: ${founderId}`);
 
@@ -125,6 +138,10 @@ export class BusinessesService {
       throw new NotFoundException(`Business with id ${id} not found`);
     }
 
+    // Invalidate cache
+    await this.cacheManager.del('allBusinesses');
+    await this.cacheManager.del(`business_${id}`);
+
     this.logger.log(`Successfully updated business with id: ${id}`);
     return updatedBusiness;
   }
@@ -140,6 +157,10 @@ export class BusinessesService {
 
     const deletedBusiness = await business.softDelete();
     this.logger.log(`Successfully soft deleted business with id: ${id}`);
+
+    // Invalidate cache
+    await this.cacheManager.del('allBusinesses');
+    await this.cacheManager.del(`business_${id}`);
 
     return deletedBusiness;
   }
