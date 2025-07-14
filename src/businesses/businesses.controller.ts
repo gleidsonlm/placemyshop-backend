@@ -27,16 +27,20 @@ import { BusinessesService } from './businesses.service';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../roles/guards/roles.guard';
+import { Roles } from '../roles/decorators/roles.decorator';
+import { RoleName } from '../roles/schemas/role.schema';
 
 @ApiTags('businesses')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('businesses')
 export class BusinessesController {
   constructor(private readonly businessesService: BusinessesService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @Roles(RoleName.ADMIN)
   @ApiOperation({
     summary: 'Create a new business',
     description: 'Create a new business with the provided information',
@@ -50,6 +54,7 @@ export class BusinessesController {
   }
 
   @Get()
+  @Roles(RoleName.ADMIN, RoleName.MANAGER)
   @ApiOperation({
     summary: 'Get all businesses',
     description: 'Retrieve a paginated list of businesses',
@@ -76,6 +81,7 @@ export class BusinessesController {
   }
 
   @Get('by-founder/:founderId')
+  @Roles(RoleName.ADMIN, RoleName.MANAGER)
   @ApiOperation({
     summary: 'Get businesses by founder',
     description: 'Retrieve all businesses founded by a specific user',
@@ -92,6 +98,7 @@ export class BusinessesController {
   }
 
   @Get(':id')
+  @Roles(RoleName.ADMIN, RoleName.MANAGER)
   @ApiOperation({
     summary: 'Get business by ID',
     description: 'Retrieve a specific business by ID',
@@ -109,6 +116,7 @@ export class BusinessesController {
   }
 
   @Patch(':id')
+  @Roles(RoleName.ADMIN)
   @ApiOperation({
     summary: 'Update business',
     description: 'Update business information',
@@ -129,6 +137,7 @@ export class BusinessesController {
   }
 
   @Delete(':id')
+  @Roles(RoleName.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete business',
@@ -147,6 +156,7 @@ export class BusinessesController {
   }
 
   @Post(':id/restore')
+  @Roles(RoleName.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Restore business',

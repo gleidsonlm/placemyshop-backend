@@ -10,6 +10,9 @@ This project is built using:
 - **TypeScript (Strict Mode):** We leverage TypeScript's strong typing system with strict mode enabled to ensure code quality and maintainability.
 - **MVC Pattern:** The project adheres to NestJS's standard Model-View-Controller (MVC) architectural pattern.
 - **Test-Driven Development (TDD):** Development practices emphasize writing tests first to ensure code quality, maintainability, and clear specifications. (See `AGENTS.md` for more details on TDD guidelines).
+- **MongoDB:** A NoSQL database for storing application data.
+- **Mongoose:** An ODM for MongoDB, providing a schema-based solution to model application data.
+- **JSON-LD & schema.org:** We use JSON-LD and schema.org vocabularies to structure our data, making it more discoverable and interoperable.
 
 ## Project Setup
 
@@ -142,6 +145,16 @@ Upon application startup, the system automatically seeds essential data if it's 
   - This user is assigned the Admin role automatically.
 
 - **Founder Validation:** When creating a new business, the system validates that the provided `founderId` corresponds to an existing user.
+
+## Data Schema
+
+The application uses a core data schema based on schema.org vocabularies to ensure data is structured and interoperable. The main entities are:
+
+- **Person (User):** Represents a user of the platform, aligned with `schema.org/Person`.
+- **Role:** Defines user roles and permissions.
+- **Business:** Represents a business, aligned with `schema.org/LocalBusiness`.
+
+For detailed schema definitions and JSON-LD examples, see `docs/SCHEMA.md`.
 
 ## Features
 

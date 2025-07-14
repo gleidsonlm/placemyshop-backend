@@ -36,6 +36,21 @@ All contributions made by AI coding agents **must** adhere to the following stan
 - **TypeScript Strict Mode:** The project uses TypeScript with strict mode enabled. Agents must generate type-safe code and leverage TypeScript's features to enhance code quality and maintainability.
 - **Framework Defaults:** Unless explicitly specified otherwise, agents should always favor NestJS framework defaults and conventions. Avoid custom configurations or patterns where standard solutions exist.
 
+## Role-Based Access Control (RBAC)
+
+The application uses a role-based access control system to manage user permissions. The available roles are `Admin`, `Manager`, and `Assistant`. Each role has a specific set of permissions that determine what actions a user can perform.
+
+### Permissions Matrix
+
+| Permission | Admin | Manager | Assistant |
+| --- | --- | --- | --- |
+| User Role Management | ✅ | ❌ | ❌ |
+| Business Details Management | ✅ | ❌ | ❌ |
+| Customer Management | ✅ | ✅ | ❌ |
+| Customer Chat Access (Full) | ✅ | ✅ | ❌ |
+| Customer Chat Access (Read/Write) | ✅ | ✅ | ✅ |
+| External Application Integration Management | ✅ | ❌ | ❌ |
+
 ## Documentation Responsibilities
 
 AI coding agents are responsible for extending or updating documentation as features are added or changed. This includes:
@@ -43,7 +58,6 @@ AI coding agents are responsible for extending or updating documentation as feat
 - **README.md:** Any significant changes to the project's setup, build process, or core functionalities should be reflected in the `README.md`.
 - **Schema Documentation:** When adding or modifying data entities, the schema documentation (e.g., in `docs/SCHEMA.md`) must be updated to reflect these changes. This includes updating JSON-LD examples and descriptions.
 - **Code Comments:** Generated code should be well-commented, explaining complex logic or non-obvious decisions.
-
 - **Caching:** When implementing caching, ensure that the cache is invalidated when data is updated or deleted.
 
 ## Commit Messages and Documentation Updates Example

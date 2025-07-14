@@ -49,7 +49,7 @@ export class Person {
   // If Role is embedded, the type would be different.
   // Based on the JSON-LD example, it seems like a simplified embedded Role or a reference.
   // For Mongoose, a direct reference is cleaner.
-  @Prop({ type: Types.ObjectId, ref: 'Role', index: true }) // Assuming 'Role' is the name of the Role model
+  @Prop({ type: Types.ObjectId, ref: 'Role', index: true, required: true }) // Assuming 'Role' is the name of the Role model
   role: Types.ObjectId | Role; // This will be populated with Role details if needed
 
   @Prop({

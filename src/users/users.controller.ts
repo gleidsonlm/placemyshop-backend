@@ -29,16 +29,20 @@ import { UsersService } from './users.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../roles/guards/roles.guard';
+import { Roles } from '../roles/decorators/roles.decorator';
+import { RoleName } from '../roles/schemas/role.schema';
 
 @ApiTags('users')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @Roles(RoleName.ADMIN)
   @ApiOperation({
     summary: 'Create a new user',
     description: 'Create a new user with the provided information',
@@ -92,6 +96,7 @@ export class UsersController {
   }
 
   @Get()
+  @Roles(RoleName.ADMIN, RoleName.MANAGER)
   @ApiOperation({
     summary: 'Get all users',
     description: 'Retrieve a paginated list of users',
@@ -138,6 +143,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @Roles(RoleName.ADMIN, RoleName.MANAGER)
   @ApiOperation({
     summary: 'Get user by ID',
     description: 'Retrieve a specific user by their ID',
@@ -180,6 +186,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @Roles(RoleName.ADMIN)
   @ApiOperation({
     summary: 'Update user',
     description: 'Update user information',
@@ -237,6 +244,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @Roles(RoleName.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete user', description: 'Soft delete a user' })
   @ApiParam({
@@ -256,6 +264,7 @@ export class UsersController {
   }
 
   @Post(':id/restore')
+  @Roles(RoleName.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Restore user',
