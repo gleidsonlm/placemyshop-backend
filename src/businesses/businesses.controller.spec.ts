@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BusinessesController } from './businesses.controller';
 import { BusinessesService } from './businesses.service';
+import { CacheModule } from '@nestjs/cache-manager';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
 import { NotFoundException } from '@nestjs/common';
@@ -34,6 +35,7 @@ describe('BusinessesController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       controllers: [BusinessesController],
       providers: [
         {

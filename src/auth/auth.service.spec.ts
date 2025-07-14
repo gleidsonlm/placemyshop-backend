@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
+import { CacheModule } from '@nestjs/cache-manager';
 import { UsersService } from '../users/users.service';
 import { UnauthorizedException } from '@nestjs/common';
 import { RoleName, Permission } from '../roles/schemas/role.schema';
@@ -38,6 +39,7 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       providers: [
         AuthService,
         {

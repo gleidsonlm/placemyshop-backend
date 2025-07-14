@@ -7,6 +7,8 @@ import { RoleSeedingService } from './roles/role-seeding.service';
 import { Person } from './users/schemas/person.schema';
 import { Business } from './businesses/schemas/business.schema';
 
+import { CacheModule } from '@nestjs/cache-manager';
+
 // Mock MongooseModule to avoid database connection
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('@nestjs/mongoose', () => ({
@@ -39,7 +41,7 @@ describe('AppModule', () => {
     };
 
     testingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppModule, CacheModule.register()],
     })
       .overrideProvider(ConfigService)
       .useValue(mockConfigService)

@@ -2,6 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LocalStrategy } from './local.strategy';
 import { AuthService } from '../auth.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { UsersService } from '../../users/users.service';
+import { JwtService } from '@nestjs/jwt';
+import { CacheModule } from '@nestjs/cache-manager';
 
 describe('LocalStrategy', () => {
   let strategy: LocalStrategy;
@@ -9,12 +12,22 @@ describe('LocalStrategy', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       providers: [
         LocalStrategy,
+        AuthService,
         {
-          provide: AuthService,
+          provide: UsersService,
           useValue: {
-            validateUser: jest.fn(),
+            validatePassword: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+            signAsync: jest.fn(),
+            verify: jest.fn(),
           },
         },
       ],

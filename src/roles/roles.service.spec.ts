@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { RolesService } from './roles.service';
+import { CacheModule } from '@nestjs/cache-manager';
 import {
   Role,
   RoleName,
@@ -39,6 +40,7 @@ describe('RolesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       providers: [
         RolesService,
         {

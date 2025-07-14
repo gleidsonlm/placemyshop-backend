@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { BusinessesService } from './businesses.service';
+import { CacheModule } from '@nestjs/cache-manager';
 import { Business } from './schemas/business.schema';
 import { Person } from '../users/schemas/person.schema';
 import { CreateBusinessDto } from './dto/create-business.dto';
@@ -38,6 +39,7 @@ describe('BusinessesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       providers: [
         BusinessesService,
         {

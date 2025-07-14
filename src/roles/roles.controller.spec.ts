@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RolesController } from './roles.controller';
 import { RolesService } from './roles.service';
+import { CacheModule } from '@nestjs/cache-manager';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleName, Permission } from './schemas/role.schema';
@@ -31,6 +32,7 @@ describe('RolesController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       controllers: [RolesController],
       providers: [
         {

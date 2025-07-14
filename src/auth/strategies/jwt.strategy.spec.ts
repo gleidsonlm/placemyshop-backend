@@ -4,6 +4,9 @@ import { AuthService } from '../auth.service';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import { Role, RoleName } from '../../roles/schemas/role.schema';
+import { UsersService } from '../../users/users.service';
+import { JwtService } from '@nestjs/jwt';
+import { CacheModule } from '@nestjs/cache-manager';
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
@@ -11,18 +14,29 @@ describe('JwtStrategy', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       providers: [
         JwtStrategy,
+        AuthService,
         {
-          provide: AuthService,
+          provide: UsersService,
           useValue: {
             validateUserById: jest.fn(),
+            findOne: jest.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
             get: jest.fn().mockReturnValue('testSecret'),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+            signAsync: jest.fn(),
+            verify: jest.fn(),
           },
         },
       ],
