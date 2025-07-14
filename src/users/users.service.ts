@@ -165,7 +165,7 @@ export class UsersService {
     // Invalidate cache
     await this.cacheManager.del('allUsers');
     await this.cacheManager.del(`user_${id}`);
-    if (updatePersonDto.email) {
+    if (updatePersonDto.email !== undefined) {
       await this.cacheManager.del(`user_email_${updatePersonDto.email}`);
     }
 

@@ -126,7 +126,7 @@ export class RolesService {
     // Invalidate cache
     await this.cacheManager.del('allRoles');
     await this.cacheManager.del(`role_${id}`);
-    if (updateRoleDto.roleName) {
+    if (updateRoleDto.roleName !== undefined) {
       await this.cacheManager.del(`role_name_${updateRoleDto.roleName}`);
     }
 
