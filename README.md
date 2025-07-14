@@ -114,9 +114,13 @@ A `Dockerfile` is included in the project root to define the build steps for the
 
 Upon application startup, the system automatically seeds essential data if it's not already present. Currently, this includes:
 
--   **Default User Roles:** Admin, Manager, and Assistant roles with their predefined permissions are created in the database. This process is idempotent and will not create duplicate roles if they already exist.
+-   **Default User Roles:** Admin, Manager, and Assistant roles with their predefined permissions are created in the database. If no permissions are provided when creating a role, default permissions will be assigned based on the role name. This process is idempotent and will not create duplicate roles if they already exist.
 
 This ensures that the application has the necessary foundational data to operate correctly from the first run.
+
+### Business Logic
+
+- **Founder Validation:** When creating a new business, the system validates that the provided `founderId` corresponds to an existing user.
 
 ## Running Tests
 

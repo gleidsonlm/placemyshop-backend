@@ -195,6 +195,21 @@ describe('UsersService', () => {
         service.update('nonexistent-id', updatePersonDto),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should throw ConflictException if email already exists', async () => {
+      const updatePersonDto: UpdatePersonDto = {
+        email: 'new.email@example.com',
+      };
+
+      mockPersonModel.findOne.mockResolvedValue({
+        _id: 'some-other-id',
+        email: 'new.email@example.com',
+      });
+
+      await expect(
+        service.update('person-uuid-123', updatePersonDto),
+      ).rejects.toThrow(ConflictException);
+    });
   });
 
   describe('remove', () => {
@@ -223,6 +238,51 @@ describe('UsersService', () => {
       await expect(service.remove('nonexistent-id')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('restore', () => {
+    it('should restore a soft-deleted person', async () => {
+      const deletedPerson = { ...mockPerson, isDeleted: true };
+      const mockQuery = {
+        exec: jest.fn().mockResolvedValue(deletedPerson),
+      };
+
+      mockPersonModel.findById.mockReturnValue(mockQuery);
+      deletedPerson.restore.mockResolvedValue({
+        ...mockPerson,
+        isDeleted: false,
+      });
+
+      const result = await service.restore('person-uuid-123');
+
+      expect(mockPersonModel.findById).toHaveBeenCalledWith('person-uuid-123');
+      expect(deletedPerson.restore).toHaveBeenCalled();
+      expect(result.isDeleted).toBe(false);
+    });
+
+    it('should throw NotFoundException if person not found', async () => {
+      mockPersonModel.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      await expect(service.restore('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should not restore a person that is not deleted', async () => {
+      const mockQuery = {
+        exec: jest.fn().mockResolvedValue(mockPerson),
+      };
+
+      mockPersonModel.findById.mockReturnValue(mockQuery);
+
+      const result = await service.restore('person-uuid-123');
+
+      expect(mockPersonModel.findById).toHaveBeenCalledWith('person-uuid-123');
+      expect(mockPerson.restore).not.toHaveBeenCalled();
+      expect(result).toEqual(mockPerson);
     });
   });
 });

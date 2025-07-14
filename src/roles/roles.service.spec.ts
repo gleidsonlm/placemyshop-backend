@@ -1,7 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { RolesService } from './roles.service';
-import { Role, RoleName, Permission } from './schemas/role.schema';
+import {
+  Role,
+  RoleName,
+  Permission,
+  getDefaultPermissionsForRole,
+} from './schemas/role.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { ConflictException, NotFoundException } from '@nestjs/common';
@@ -67,6 +72,22 @@ describe('RolesService', () => {
       });
       expect(mockRoleModel.create).toHaveBeenCalled();
       expect(result).toEqual(mockRole);
+    });
+
+    it('should create a new role with default permissions if none are provided', async () => {
+      const createRoleDto: CreateRoleDto = {
+        roleName: RoleName.ASSISTANT,
+        permissions: [],
+      };
+
+      mockRoleModel.findOne.mockResolvedValue(null);
+      mockRoleModel.create.mockImplementation((dto) => Promise.resolve(dto));
+
+      const result = await service.create(createRoleDto);
+
+      expect(result.permissions).toEqual(
+        getDefaultPermissionsForRole(RoleName.ASSISTANT),
+      );
     });
 
     it('should throw ConflictException if role name already exists', async () => {
@@ -161,6 +182,19 @@ describe('RolesService', () => {
       await expect(
         service.update('nonexistent-id', updateRoleDto),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ConflictException if updating to a role name that already exists', async () => {
+      const updateRoleDto: UpdateRoleDto = { roleName: RoleName.ADMIN };
+
+      mockRoleModel.findOne.mockResolvedValue({
+        _id: 'some-other-id',
+        roleName: RoleName.ADMIN,
+      });
+
+      await expect(
+        service.update('role-uuid-123', updateRoleDto),
+      ).rejects.toThrow(ConflictException);
     });
   });
 

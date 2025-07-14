@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Business, BusinessDocument } from './schemas/business.schema';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
+import { Person, PersonDocument } from '../users/schemas/person.schema';
 
 @Injectable()
 export class BusinessesService {
@@ -12,6 +18,8 @@ export class BusinessesService {
   constructor(
     @InjectModel(Business.name)
     private readonly businessModel: Model<BusinessDocument>,
+    @InjectModel(Person.name)
+    private readonly personModel: Model<PersonDocument>,
   ) {}
 
   async create(
@@ -19,11 +27,26 @@ export class BusinessesService {
   ): Promise<BusinessDocument> {
     this.logger.log(`Creating new business: ${createBusinessDto.name}`);
 
+    // Ensure the founder exists
+    const founder = await this.personModel
+      .findOne({
+        '@id': createBusinessDto.founderId,
+        isDeleted: { $ne: true },
+      })
+      .exec();
+    if (!founder) {
+      throw new BadRequestException(
+        `Founder with ID "${createBusinessDto.founderId}" not found.`,
+      );
+    }
+
     // Map founderId to founder field
-    const { founderId, ...businessDataWithoutFounderId } = createBusinessDto;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { founderId: _founderId, ...businessDataWithoutFounderId } =
+      createBusinessDto;
     const businessData = {
       ...businessDataWithoutFounderId,
-      founder: founderId,
+      founder: founder._id, // Use the ObjectId of the found user
     };
 
     const createdBusiness = await this.businessModel.create(businessData);
