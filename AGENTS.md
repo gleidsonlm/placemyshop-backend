@@ -112,4 +112,9 @@ All related tests now pass.
 }
 ```
 
+
+## Licensing
+
+All contributions made by AI coding agents to this project are licensed under the GNU Affero General Public License, version 3 (AGPL-3.0). By contributing to this project, you agree that your contributions will be licensed under the AGPL-3.0.
+
 By following these guidelines, AI coding agents can contribute effectively and maintain the high quality standards of the `placemyshop-backend` project

@@ -225,7 +225,15 @@ For guidelines on how AI coding agents should contribute to this project:
 
 ## License
 
-This project is MIT licensed.
+This project is licensed under the GNU Affero General Public License, version 3 (AGPL-3.0).
+
+The full text of the license can be found in the `LICENSE` file.
+
+**Implications for Users and Contributors:**
+
+*   **If you use this software over a network (e.g., as a service provider), you must make the source code available to the users of the service.** This is the main difference from the standard GPL.
+*   Any modifications you make to the software must also be licensed under the AGPL-3.0.
+*   If you contribute to this project, your contributions will be licensed under the AGPL-3.0.
 
 ## API Overview
 
