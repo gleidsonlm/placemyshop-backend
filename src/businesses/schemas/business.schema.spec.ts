@@ -199,16 +199,21 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       if (!populatedBusiness) return;
 
       const businessJSON = populatedBusiness.toJSON({ virtuals: true });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const founderAsAny = businessJSON.founder as any;
 
       expect(founderAsAny).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(founderAsAny['@type']).toEqual('Person');
       // console.log(`Business spec - Populated founderAsAny['@id'] type: ${typeof founderAsAny['@id']}, value: ${founderAsAny['@id']}`);
       // console.log(`Business spec - Expected testFounder['@id']: ${testFounder['@id']}, testFounder._id: ${testFounder._id!.toString()}`);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(typeof founderAsAny['@id']).toBe('string');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(founderAsAny['@id']).toEqual(
         testFounder['@id'] || String(testFounder._id),
       );
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(founderAsAny.passwordHash).toBeUndefined();
     });
 
@@ -219,10 +224,13 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       }).save();
 
       const businessJSON = business.toJSON({ virtuals: true });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const founderAsAny = businessJSON.founder as any;
 
       expect(founderAsAny).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(founderAsAny['@type']).toEqual('Person');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(founderAsAny['@id']).toEqual(String(testFounder._id));
     });
 

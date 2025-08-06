@@ -13,6 +13,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { RoleSeedingService } from './role-seeding.service';
@@ -28,7 +31,7 @@ jest.mock('@nestjs/common/services/logger.service');
 
 // Define a base mock for save outside, so we can track its calls across instances
 const mockSave = jest.fn();
-const mockRoleInstance = (dto: any) => ({
+const mockRoleInstance = (dto: Partial<Role>) => ({
   ...dto,
   save: mockSave, // All instances will share this mockSave
 });

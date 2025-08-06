@@ -14,12 +14,11 @@
  */
 
 import {
-  IsString,
   IsNotEmpty,
   IsArray,
   IsEnum,
   IsOptional,
-  IsUUID.
+  IsUUID,
 } from 'class-validator';
 import { Permission, RoleName } from '../schemas/role.schema';
 

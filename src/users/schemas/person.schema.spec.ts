@@ -224,16 +224,22 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       if (!populatedPersonDoc) return;
 
       const personJSON = populatedPersonDoc.toJSON({ virtuals: true });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const roleAsAny = personJSON.role as any;
 
       expect(roleAsAny).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(roleAsAny['@type']).toEqual('Role');
       // console.log(`Person spec - Populated roleAsAny['@id'] type: ${typeof roleAsAny['@id']}, value: ${roleAsAny['@id']}`);
       // console.log(`Person spec - Expected testRole['@id']: ${testRole['@id']}, testRole._id: ${testRole._id!.toString()}`);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(typeof roleAsAny['@id']).toBe('string'); // Assert it's a string first
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(roleAsAny['@id']).toEqual(
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         testRole['@id'] || testRole._id!.toString(),
       ); // Compare strings
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(roleAsAny.roleName).toEqual(testRole.roleName);
     });
 
@@ -247,11 +253,15 @@ describe('Person Schema (with NestJS Testing Module)', () => {
       }).save();
 
       const personJSON = person.toJSON({ virtuals: true });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const roleAsAny = personJSON.role as any;
 
       expect(roleAsAny).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(roleAsAny['@type']).toEqual('Role');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-base-to-string
       expect(roleAsAny['@id']).toEqual(testRole._id!.toString());
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(roleAsAny.roleName).toBeUndefined();
     });
   });

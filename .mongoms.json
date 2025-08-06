@@ -1,0 +1,13 @@
+{
+  "version": "7.0.8",
+  "downloadDir": "/tmp/mongodb-binaries",
+  "systemBinary": "",
+  "runtime": {
+    "disablePostinstall": true
+  },
+  "debug": true,
+  "download": {
+    "timeout": 120000,
+    "retries": 3
+  }
+}
