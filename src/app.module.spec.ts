@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 /*
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,6 +12,8 @@ import { ConfigService } from '@nestjs/config';
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+import { ConfigService } from '@nestjs/config';
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from './app.module';
