@@ -13,11 +13,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getModelToken, MongooseModule, getConnectionToken } from '@nestjs/mongoose'; // Import getConnectionToken
+import {
+  getModelToken,
+  MongooseModule,
+  getConnectionToken,
+} from '@nestjs/mongoose'; // Import getConnectionToken
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, Model } from 'mongoose';
-import { Role, RoleSchema, RoleDocument, RoleName, Permission, getDefaultPermissionsForRole } from './role.schema';
+import {
+  Role,
+  RoleSchema,
+  RoleDocument,
+  RoleName,
+  Permission,
+  getDefaultPermissionsForRole,
+} from './role.schema';
 
 describe('Role Schema (with NestJS Testing Module)', () => {
   let mongod: MongoMemoryServer;
@@ -73,11 +84,15 @@ describe('Role Schema (with NestJS Testing Module)', () => {
       expect(role.deletedAt).toBeInstanceOf(Date);
       expect(saveSpy).toHaveBeenCalled();
 
-      const foundWithDeleted = await roleModel.findOne({ _id: role._id, isDeleted: true }).exec();
+      const foundWithDeleted = await roleModel
+        .findOne({ _id: role._id, isDeleted: true })
+        .exec();
       expect(foundWithDeleted).not.toBeNull();
       expect(foundWithDeleted?.isDeleted).toBe(true);
 
-      const foundNonDeleted = await roleModel.findOne({ _id: role._id, isDeleted: false }).exec();
+      const foundNonDeleted = await roleModel
+        .findOne({ _id: role._id, isDeleted: false })
+        .exec();
       expect(foundNonDeleted).toBeNull();
       saveSpy.mockRestore();
     });
@@ -96,7 +111,7 @@ describe('Role Schema (with NestJS Testing Module)', () => {
       await role.restore();
 
       expect(role.isDeleted).toBe(false);
-      expect(role.deletedAt).toBeNull();
+      expect(role.deletedAt).toBeUndefined();
       expect(saveSpy).toHaveBeenCalled();
 
       const foundRole = await roleModel.findById(role._id).exec();
@@ -113,20 +128,31 @@ describe('Role Schema (with NestJS Testing Module)', () => {
         roleName: RoleName.ASSISTANT,
         permissions: getDefaultPermissionsForRole(RoleName.ASSISTANT),
       };
-      let role = new roleModel(roleData) as RoleDocument;
+      const role = new roleModel(roleData) as RoleDocument;
       const savedRole = await role.save();
 
-      await new Promise(resolve => setTimeout(resolve, 20));
-      savedRole.permissions = [...savedRole.permissions!, Permission.MANAGE_BUSINESS_DETAILS];
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      savedRole.permissions = [
+        ...savedRole.permissions,
+        Permission.MANAGE_BUSINESS_DETAILS,
+      ];
       const updatedRole = await savedRole.save();
 
-      const roleObj = updatedRole.toObject({ virtuals: true }) as RoleDocument & { dateCreated: Date, dateModified: Date };
+      const roleObj = updatedRole.toObject({
+        virtuals: true,
+      }) as RoleDocument & { dateCreated: Date; dateModified: Date };
 
       expect(roleObj.dateCreated).toBeInstanceOf(Date);
       expect(roleObj.dateModified).toBeInstanceOf(Date);
-      expect(new Date(roleObj.dateCreated).getTime()).toEqual(updatedRole.createdAt.getTime());
-      expect(new Date(roleObj.dateModified).getTime()).toEqual(updatedRole.updatedAt.getTime());
-      expect(updatedRole.updatedAt.getTime()).toBeGreaterThan(updatedRole.createdAt.getTime());
+      expect(new Date(roleObj.dateCreated).getTime()).toEqual(
+        updatedRole.createdAt.getTime(),
+      );
+      expect(new Date(roleObj.dateModified).getTime()).toEqual(
+        updatedRole.updatedAt.getTime(),
+      );
+      expect(updatedRole.updatedAt.getTime()).toBeGreaterThan(
+        updatedRole.createdAt.getTime(),
+      );
     });
   });
 
@@ -148,35 +174,41 @@ describe('Role Schema (with NestJS Testing Module)', () => {
   describe('getDefaultPermissionsForRole Helper', () => {
     it('should return correct permissions for ADMIN', () => {
       const permissions = getDefaultPermissionsForRole(RoleName.ADMIN);
-      expect(permissions).toEqual(expect.arrayContaining([
-        Permission.MANAGE_USER_ROLES,
-        Permission.MANAGE_BUSINESS_DETAILS,
-        Permission.MANAGE_CUSTOMERS_ADMIN,
-        Permission.ACCESS_CUSTOMER_CHAT_FULL_ADMIN,
-        Permission.MANAGE_EXTERNAL_INTEGRATIONS,
-      ]));
+      expect(permissions).toEqual(
+        expect.arrayContaining([
+          Permission.MANAGE_USER_ROLES,
+          Permission.MANAGE_BUSINESS_DETAILS,
+          Permission.MANAGE_CUSTOMERS_ADMIN,
+          Permission.ACCESS_CUSTOMER_CHAT_FULL_ADMIN,
+          Permission.MANAGE_EXTERNAL_INTEGRATIONS,
+        ]),
+      );
       expect(permissions.length).toBe(5);
     });
 
     it('should return correct permissions for MANAGER', () => {
       const permissions = getDefaultPermissionsForRole(RoleName.MANAGER);
-      expect(permissions).toEqual(expect.arrayContaining([
-        Permission.MANAGE_CUSTOMERS_MANAGER,
-        Permission.ACCESS_CUSTOMER_CHAT_FULL_MANAGER,
-      ]));
+      expect(permissions).toEqual(
+        expect.arrayContaining([
+          Permission.MANAGE_CUSTOMERS_MANAGER,
+          Permission.ACCESS_CUSTOMER_CHAT_FULL_MANAGER,
+        ]),
+      );
       expect(permissions.length).toBe(2);
     });
 
     it('should return correct permissions for ASSISTANT', () => {
       const permissions = getDefaultPermissionsForRole(RoleName.ASSISTANT);
-      expect(permissions).toEqual(expect.arrayContaining([
-        Permission.ACCESS_CUSTOMER_CHAT_READ_WRITE,
-      ]));
+      expect(permissions).toEqual(
+        expect.arrayContaining([Permission.ACCESS_CUSTOMER_CHAT_READ_WRITE]),
+      );
       expect(permissions.length).toBe(1);
     });
 
     it('should return empty array for an unknown role name', () => {
-      const permissions = getDefaultPermissionsForRole('UnknownRole' as RoleName);
+      const permissions = getDefaultPermissionsForRole(
+        'UnknownRole' as RoleName,
+      );
       expect(permissions).toEqual([]);
     });
   });

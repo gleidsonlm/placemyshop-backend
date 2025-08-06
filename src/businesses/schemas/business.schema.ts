@@ -14,7 +14,7 @@
  */
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types, Model } from 'mongoose'; // Import Model
+import { Document, Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { Person } from '../../users/schemas/person.schema'; // Import Person type
 
@@ -22,7 +22,8 @@ import { Person } from '../../users/schemas/person.schema'; // Import Person typ
 // We'll use Types.ObjectId to reference the Person document for the founder.
 
 @Schema({ _id: false }) // No separate _id for PostalAddress, it's part of Business
-export class PostalAddress { // No longer extends Document directly, it's a sub-document
+export class PostalAddress {
+  // No longer extends Document directly, it's a sub-document
   @Prop({ default: 'PostalAddress' })
   '@type': string;
 
@@ -47,8 +48,12 @@ export const PostalAddressSchema = SchemaFactory.createForClass(PostalAddress);
 export interface BusinessDocument extends Business, Document {
   createdAt: Date;
   updatedAt: Date;
-  softDelete(): Promise<this & Document<unknown, {}, BusinessDocument>>;
-  restore(): Promise<this & Document<unknown, {}, BusinessDocument>>;
+  softDelete(): Promise<
+    this & Document<unknown, Record<string, unknown>, BusinessDocument>
+  >;
+  restore(): Promise<
+    this & Document<unknown, Record<string, unknown>, BusinessDocument>
+  >;
 }
 
 @Schema({ timestamps: true, collection: 'businesses' })
@@ -100,45 +105,59 @@ export class Business {
 
 export const BusinessSchema = SchemaFactory.createForClass(Business);
 
-BusinessSchema.virtual('dateCreated').get(function(this: BusinessDocument) {
+BusinessSchema.virtual('dateCreated').get(function (this: BusinessDocument) {
   return this.createdAt;
 });
 
-BusinessSchema.virtual('dateModified').get(function(this: BusinessDocument) {
+BusinessSchema.virtual('dateModified').get(function (this: BusinessDocument) {
   return this.updatedAt;
 });
 
 BusinessSchema.set('toJSON', {
   virtuals: true,
   getters: true,
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/strict-boolean-expressions */
   transform: function (doc: any, ret: any) {
     ret['@context'] = 'https://schema.org';
     // '@type' is already handled by a direct Prop default: 'LocalBusiness'
     // but ensure it's present in the final 'ret' object
-    if (!ret['@type']) {
-        ret['@type'] = doc['@type'] || 'LocalBusiness';
-    }
+    ret['@type'] ??=
+      (doc as unknown as Record<string, unknown>)['@type'] ?? 'LocalBusiness';
 
     // Ensure the main document's @id is correctly set
-    if (typeof doc['@id'] === 'string' && doc['@id'].length > 0) {
-      ret['@id'] = doc['@id'];
+    if (
+      typeof (doc as unknown as Record<string, unknown>)['@id'] === 'string' &&
+      String((doc as unknown as Record<string, unknown>)['@id']).length > 0
+    ) {
+      ret['@id'] = (doc as unknown as Record<string, unknown>)['@id'];
     } else if (doc._id) {
       ret['@id'] = doc._id.toString();
     }
 
     // Customize the 'founder' field output
     if (ret.founder) {
-      const founderDoc = doc.founder; // Original populated document or ObjectId
+      const founderDoc = doc.founder as unknown; // Original populated document or ObjectId
       let founderIdValue = '';
 
-      if (founderDoc && typeof founderDoc === 'object') { // Populated
-        if (typeof founderDoc['@id'] === 'string' && founderDoc['@id'].length > 0) {
-          founderIdValue = founderDoc['@id'];
-        } else if (founderDoc._id) {
-          founderIdValue = founderDoc._id.toString();
+      if (founderDoc && typeof founderDoc === 'object') {
+        // Populated
+        const founderRecord = founderDoc as Record<string, unknown>;
+        if (
+          typeof founderRecord['@id'] === 'string' &&
+          String(founderRecord['@id']).length > 0
+        ) {
+          founderIdValue = String(founderRecord['@id']);
+        } else if (founderRecord._id) {
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string
+          founderIdValue = founderRecord._id.toString();
         }
-      } else if (founderDoc) { // ObjectId or string ID
-        founderIdValue = founderDoc.toString();
+      } else if (founderDoc) {
+        // ObjectId or string ID
+        founderIdValue =
+          typeof founderDoc === 'string'
+            ? founderDoc
+            : (founderDoc as { toString(): string }).toString();
       }
 
       if (founderIdValue) {
@@ -146,51 +165,72 @@ BusinessSchema.set('toJSON', {
           '@type': 'Person',
           '@id': founderIdValue,
         };
-      } else if (typeof ret.founder === 'object' && ret.founder['@id']) {
+      } else if (
+        typeof ret.founder === 'object' &&
+        ret.founder &&
+        (ret.founder as Record<string, unknown>)['@id']
+      ) {
         // If Person's toJSON already transformed it and put an '@id'
-         ret.founder = {
+        ret.founder = {
           '@type': 'Person',
-          '@id': ret.founder['@id'],
+          '@id': (ret.founder as Record<string, unknown>)['@id'],
         };
-      } else if (ret.founder) { // Fallback for non-object ID case
-         ret.founder = {
+      } else if (ret.founder) {
+        // Fallback for non-object ID case
+        ret.founder = {
           '@type': 'Person',
-          '@id': ret.founder.toString(),
+          '@id':
+            typeof ret.founder === 'string'
+              ? ret.founder
+              : (ret.founder as { toString(): string }).toString(),
         };
       }
     }
 
     // Ensure PostalAddress gets its @type if it's not automatically included by sub-schema toJSON
-    if (ret.address && typeof ret.address === 'object' && !ret.address['@type']) {
-        ret.address['@type'] = 'PostalAddress';
+    if (
+      ret.address &&
+      typeof ret.address === 'object' &&
+      !(ret.address as Record<string, unknown>)['@type']
+    ) {
+      (ret.address as Record<string, unknown>)['@type'] = 'PostalAddress';
     }
 
     // Ensure dateCreated and dateModified are using the virtuals
-    ret.dateCreated = doc.dateCreated;
-    ret.dateModified = doc.dateModified;
+    const docWithVirtuals = doc as unknown as {
+      dateCreated: unknown;
+      dateModified: unknown;
+    };
+    ret.dateCreated = docWithVirtuals.dateCreated;
+    ret.dateModified = docWithVirtuals.dateModified;
 
     // delete ret.__v;
     // delete ret._id;
     return ret;
   },
+  /* eslint-enable @typescript-eslint/strict-boolean-expressions */
 });
 BusinessSchema.set('toObject', { virtuals: true, getters: true });
 
 // Indexes
 BusinessSchema.index({ isDeleted: 1, name: 1 });
-BusinessSchema.index({ isDeleted: 1, '@id': 1 }, { unique: true, partialFilterExpression: { isDeleted: false } });
+BusinessSchema.index(
+  { isDeleted: 1, '@id': 1 },
+  { unique: true, partialFilterExpression: { isDeleted: false } },
+);
 // Consider geospatial index if address.geolocation is added later
 // e.g., BusinessSchema.index({ 'address.location': '2dsphere' });
 
 // Soft delete methods
-BusinessSchema.methods.softDelete = function() {
+
+BusinessSchema.methods.softDelete = function (this: BusinessDocument) {
   this.deletedAt = new Date();
   this.isDeleted = true;
   return this.save();
 };
 
-BusinessSchema.methods.restore = function() {
-  this.deletedAt = null;
+BusinessSchema.methods.restore = function (this: BusinessDocument) {
+  this.deletedAt = undefined;
   this.isDeleted = false;
   return this.save();
 };

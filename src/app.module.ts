@@ -13,6 +13,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
@@ -21,9 +22,13 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { BusinessesModule } from './businesses/businesses.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    CacheModule.register({
+      isGlobal: true,
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -42,6 +47,7 @@ import { BusinessesModule } from './businesses/businesses.module';
     UsersModule,
     RolesModule,
     BusinessesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -39,7 +39,7 @@ describe('AppController (e2e)', () => {
   });
 
   afterEach(async () => {
-    if (app) {
+    if (app !== null && app !== undefined) {
       await app.close();
     }
   });

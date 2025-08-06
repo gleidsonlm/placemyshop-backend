@@ -13,7 +13,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IsEmail, IsString, IsOptional, IsEnum, MinLength, IsUUID } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsOptional,
+  IsEnum,
+  MinLength,
+} from 'class-validator';
 import { PersonStatus } from '../schemas/person.schema';
 
 export class UpdatePersonDto {

@@ -13,13 +13,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getModelToken, MongooseModule, getConnectionToken } from '@nestjs/mongoose'; // Import getConnectionToken
+import {
+  getModelToken,
+  MongooseModule,
+  getConnectionToken,
+} from '@nestjs/mongoose'; // Import getConnectionToken
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { Connection, Model, Types, Document as MongooseDocument } from 'mongoose';
-import { Business, BusinessSchema, BusinessDocument, PostalAddress } from './business.schema';
-import { Person, PersonSchema, PersonDocument, PersonStatus } from '../../users/schemas/person.schema';
-import { Role, RoleSchema, RoleDocument, RoleName } from '../../roles/schemas/role.schema';
+import { Connection, Model } from 'mongoose';
+import { Business, BusinessSchema, BusinessDocument } from './business.schema';
+import {
+  Person,
+  PersonSchema,
+  PersonDocument,
+  PersonStatus,
+} from '../../users/schemas/person.schema';
+import {
+  Role,
+  RoleSchema,
+  RoleDocument,
+  RoleName,
+} from '../../roles/schemas/role.schema';
 
 describe('Business Schema (with NestJS Testing Module)', () => {
   let mongod: MongoMemoryServer;
@@ -45,7 +59,9 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       ],
     }).compile();
 
-    businessModel = module.get<Model<BusinessDocument>>(getModelToken(Business.name));
+    businessModel = module.get<Model<BusinessDocument>>(
+      getModelToken(Business.name),
+    );
     personModel = module.get<Model<PersonDocument>>(getModelToken(Person.name));
     roleModel = module.get<Model<RoleDocument>>(getModelToken(Role.name));
   });
@@ -60,7 +76,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
     testRole = await new roleModel({
       '@id': 'role-uuid-for-business-test',
       roleName: RoleName.ADMIN,
-      permissions: []
+      permissions: [],
     }).save();
 
     await personModel.deleteMany({}).exec();
@@ -102,11 +118,15 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       expect(business.deletedAt).toBeInstanceOf(Date);
       expect(saveSpy).toHaveBeenCalled();
 
-      const foundWithDeleted = await businessModel.findOne({ _id: business._id, isDeleted: true }).exec();
+      const foundWithDeleted = await businessModel
+        .findOne({ _id: business._id, isDeleted: true })
+        .exec();
       expect(foundWithDeleted).not.toBeNull();
       expect(foundWithDeleted?.isDeleted).toBe(true);
 
-      const foundNonDeleted = await businessModel.findOne({ _id: business._id, isDeleted: false }).exec();
+      const foundNonDeleted = await businessModel
+        .findOne({ _id: business._id, isDeleted: false })
+        .exec();
       expect(foundNonDeleted).toBeNull();
       saveSpy.mockRestore();
     });
@@ -125,7 +145,7 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       await business.restore();
 
       expect(business.isDeleted).toBe(false);
-      expect(business.deletedAt).toBeNull();
+      expect(business.deletedAt).toBeUndefined();
       expect(saveSpy).toHaveBeenCalled();
 
       const foundBusiness = await businessModel.findById(business._id).exec();
@@ -139,20 +159,28 @@ describe('Business Schema (with NestJS Testing Module)', () => {
   describe('Virtual Properties', () => {
     it('should have dateCreated and dateModified virtuals', async () => {
       const businessData = { name: 'Virtual Biz', founder: testFounder._id }; // Use ObjectId
-      let business = new businessModel(businessData) as BusinessDocument;
+      const business = new businessModel(businessData) as BusinessDocument;
       const savedBusiness = await business.save();
 
-      await new Promise(resolve => setTimeout(resolve, 20));
+      await new Promise((resolve) => setTimeout(resolve, 20));
       savedBusiness.name = 'Virtual Biz Updated';
       const updatedBusiness = await savedBusiness.save();
 
-      const businessObj = updatedBusiness.toObject({ virtuals: true }) as BusinessDocument & { dateCreated: Date, dateModified: Date };
+      const businessObj = updatedBusiness.toObject({
+        virtuals: true,
+      }) as BusinessDocument & { dateCreated: Date; dateModified: Date };
 
       expect(businessObj.dateCreated).toBeInstanceOf(Date);
       expect(businessObj.dateModified).toBeInstanceOf(Date);
-      expect(new Date(businessObj.dateCreated).getTime()).toEqual(updatedBusiness.createdAt.getTime());
-      expect(new Date(businessObj.dateModified).getTime()).toEqual(updatedBusiness.updatedAt.getTime());
-      expect(updatedBusiness.updatedAt.getTime()).toBeGreaterThan(updatedBusiness.createdAt.getTime());
+      expect(new Date(businessObj.dateCreated).getTime()).toEqual(
+        updatedBusiness.createdAt.getTime(),
+      );
+      expect(new Date(businessObj.dateModified).getTime()).toEqual(
+        updatedBusiness.updatedAt.getTime(),
+      );
+      expect(updatedBusiness.updatedAt.getTime()).toBeGreaterThan(
+        updatedBusiness.createdAt.getTime(),
+      );
     });
   });
 
@@ -163,12 +191,14 @@ describe('Business Schema (with NestJS Testing Module)', () => {
         founder: testFounder._id, // Use ObjectId
       }).save();
 
-      const populatedBusiness = await businessModel.findById(business._id).populate<{ founder: PersonDocument }>('founder').exec();
+      const populatedBusiness = await businessModel
+        .findById(business._id)
+        .populate<{ founder: PersonDocument }>('founder')
+        .exec();
       expect(populatedBusiness).toBeDefined();
       if (!populatedBusiness) return;
 
       const businessJSON = populatedBusiness.toJSON({ virtuals: true });
-      console.log('businessJSON.founder (populated test):', JSON.stringify(businessJSON.founder, null, 2));
       const founderAsAny = businessJSON.founder as any;
 
       expect(founderAsAny).toBeDefined();
@@ -176,7 +206,9 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       // console.log(`Business spec - Populated founderAsAny['@id'] type: ${typeof founderAsAny['@id']}, value: ${founderAsAny['@id']}`);
       // console.log(`Business spec - Expected testFounder['@id']: ${testFounder['@id']}, testFounder._id: ${testFounder._id!.toString()}`);
       expect(typeof founderAsAny['@id']).toBe('string');
-      expect(founderAsAny['@id']).toEqual(testFounder['@id'] || testFounder._id!.toString());
+      expect(founderAsAny['@id']).toEqual(
+        testFounder['@id'] || String(testFounder._id),
+      );
       expect(founderAsAny.passwordHash).toBeUndefined();
     });
 
@@ -191,13 +223,14 @@ describe('Business Schema (with NestJS Testing Module)', () => {
 
       expect(founderAsAny).toBeDefined();
       expect(founderAsAny['@type']).toEqual('Person');
-      expect(founderAsAny['@id']).toEqual(testFounder._id!.toString());
+      expect(founderAsAny['@id']).toEqual(String(testFounder._id));
     });
 
     it('should correctly serialize PostalAddress if present', async () => {
       // PostalAddress is a class, not an interface for this test.
       // The DTO uses a plain object. Here we test the schema's PostalAddress.
-      const addressData = { // This should match the structure defined in PostalAddress class
+      const addressData = {
+        // This should match the structure defined in PostalAddress class
         '@type': 'PostalAddress',
         streetAddress: '123 Main St',
         addressLocality: 'Anytown',
@@ -239,18 +272,29 @@ describe('Business Schema (with NestJS Testing Module)', () => {
       };
       const business = new businessModel(fullBusinessData);
       const savedBusiness = await business.save();
-      const foundBusiness = await businessModel.findById(savedBusiness._id).exec();
+      const foundBusiness = await businessModel
+        .findById(savedBusiness._id)
+        .exec();
 
       expect(foundBusiness).not.toBeNull();
       expect(foundBusiness?.name).toEqual(fullBusinessData.name);
       expect(foundBusiness?.description).toEqual(fullBusinessData.description);
-      expect(foundBusiness?.address?.streetAddress).toEqual(addressInput.streetAddress);
+      expect(foundBusiness?.address?.streetAddress).toEqual(
+        addressInput.streetAddress,
+      );
       expect(foundBusiness?.telephone).toEqual(fullBusinessData.telephone);
       expect(foundBusiness?.email).toEqual(fullBusinessData.email);
       expect(foundBusiness?.url).toEqual(fullBusinessData.url);
-      expect(foundBusiness?.sameAs).toEqual(expect.arrayContaining(fullBusinessData.sameAs));
-      expect(foundBusiness?.openingHours).toEqual(expect.arrayContaining(fullBusinessData.openingHours));
-      expect(foundBusiness?.founder.toString()).toEqual(testFounder._id!.toString());
+      expect(foundBusiness?.sameAs).toEqual(
+        expect.arrayContaining(fullBusinessData.sameAs),
+      );
+      expect(foundBusiness?.openingHours).toEqual(
+        expect.arrayContaining(fullBusinessData.openingHours),
+      );
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      expect(foundBusiness?.founder?.toString()).toEqual(
+        testFounder._id?.toString(),
+      );
     });
   });
 });

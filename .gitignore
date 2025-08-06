@@ -54,5 +54,11 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Package locks
 bun.lock
+package-lock.json
+
+# Docker database disk
 mongo-data
+
