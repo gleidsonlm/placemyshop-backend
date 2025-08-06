@@ -13,7 +13,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsOptional } from 'class-validator';
 import { Permission, RoleName } from '../schemas/role.schema';
 
 export class UpdateRoleDto {

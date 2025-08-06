@@ -13,7 +13,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -65,9 +65,12 @@ export class RoleSeedingService {
           );
         }
       } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
         this.logger.error(
-          `Error seeding role "${roleName}": ${error.message}`,
-          error.stack,
+          `Error seeding role "${roleName}": ${errorMessage}`,
+          errorStack,
         );
       }
     }
