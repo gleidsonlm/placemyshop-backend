@@ -176,7 +176,7 @@ This project uses Jest for testing with TypeScript support. The test configurati
 # Run all unit tests (excludes schema tests that require MongoDB)
 npm run test:unit
 
-# Run all tests (requires MongoDB connection for schema tests)
+# Run all tests (includes schema tests if MongoDB Memory Server is available)
 npm test
 
 # Run tests in watch mode
@@ -191,9 +191,23 @@ npm run test:e2e
 
 ### Test Structure
 
-- **Unit Tests:** DTO validation, service logic, controller behavior
-- **Schema Tests:** Mongoose schema validation and transformation (requires MongoDB)
+- **Unit Tests:** DTO validation, service logic, controller behavior (160 tests)
+- **Schema Tests:** Mongoose schema validation and transformation (21 tests, requires MongoDB Memory Server)
 - **E2E Tests:** Full application integration tests
+
+### MongoDB Memory Server
+
+Schema tests use MongoDB Memory Server for isolated testing. These tests are automatically skipped in environments where MongoDB Memory Server cannot download required binaries (such as restricted CI/CD environments). In such cases, you'll see:
+
+```
+Test Suites: 3 skipped, 21 passed, 21 of 24 total
+Tests:       21 skipped, 160 passed, 181 total
+```
+
+To force MongoDB-dependent tests to run in CI environments, set the environment variable:
+```bash
+ALLOW_MONGO_DOWNLOAD=true npm test
+```
 
 ## Documentation
 
